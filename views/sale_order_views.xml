@@ -41,8 +41,10 @@
             </xpath>
 
             <!-- Columnas administrativas en las líneas: opcionales y OCULTAS
-                 por defecto; sólo las ven los grupos CVA. -->
-            <xpath expr="//field[@name='order_line']/list/field[@name='price_subtotal']" position="after">
+                 por defecto; sólo las ven los grupos CVA. Ancla robusta: se
+                 agregan al FINAL de la lista (los builds Enterprise cambian
+                 las columnas y un ancla posicional tumba el registry). -->
+            <xpath expr="//field[@name='order_line']/list" position="inside">
                 <field name="x_cva_percent" optional="hide" string="% Adm."
                        groups="sale_admin_value_control.group_cva_user"/>
                 <field name="x_cva_price_subtotal" optional="hide" string="Subtotal Adm."
@@ -110,7 +112,7 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_tree"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='amount_total']" position="after">
+            <xpath expr="//list" position="inside">
                 <field name="x_cva_state" optional="hide" string="Estado Adm."
                        groups="sale_admin_value_control.group_cva_user"/>
                 <field name="x_cva_percent" optional="hide" string="% Adm."
@@ -128,7 +130,7 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_quotation_tree"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='amount_total']" position="after">
+            <xpath expr="//list" position="inside">
                 <field name="x_cva_state" optional="hide" string="Estado Adm."
                        groups="sale_admin_value_control.group_cva_user"/>
                 <field name="x_cva_amount_total" optional="hide" string="Total Adm." sum="Suma"
