@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cva_reset_wizard_form" model="ir.ui.view">
+        <field name="name">sale.cva.reset.wizard.form</field>
+        <field name="model">sale.cva.reset.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Restablecer valor administrativo">
+                <sheet>
+                    <div class="alert alert-warning" role="alert">
+                        Esta acción restablece el porcentaje administrativo a 0%.
+                        El historial anterior se conserva y la operación queda registrada.
+                    </div>
+                    <group>
+                        <field name="order_id" readonly="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="summary" readonly="1" nolabel="1" colspan="2"/>
+                        <field name="reason" placeholder="Motivo del restablecimiento"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Restablecer" name="action_confirm"
+                            type="object" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

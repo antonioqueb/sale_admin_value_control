@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cva_history_list" model="ir.ui.view">
+        <field name="name">sale.cva.history.list</field>
+        <field name="model">sale.cva.history</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false">
+                <field name="date"/>
+                <field name="order_id"/>
+                <field name="action"/>
+                <field name="user_id"/>
+                <field name="percent_before" string="% ant."/>
+                <field name="percent_after" string="% nuevo"/>
+                <field name="amount_reference" string="Registrado"/>
+                <field name="amount_before" string="Adm. anterior"/>
+                <field name="amount_after" string="Adm. resultante"/>
+                <field name="reason" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cva_history_form" model="ir.ui.view">
+        <field name="name">sale.cva.history.form</field>
+        <field name="model">sale.cva.history</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="order_id"/>
+                            <field name="action"/>
+                            <field name="user_id"/>
+                            <field name="date"/>
+                            <field name="reason"/>
+                        </group>
+                        <group>
+                            <field name="percent_before"/>
+                            <field name="percent_after"/>
+                            <field name="amount_reference"/>
+                            <field name="amount_before"/>
+                            <field name="amount_after"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <separator string="Líneas afectadas"/>
+                    <field name="line_ids" readonly="1">
+                        <list create="false" edit="false" delete="false">
+                            <field name="product_id"/>
+                            <field name="name" optional="hide"/>
+                            <field name="qty"/>
+                            <field name="percent_before" string="% ant."/>
+                            <field name="percent_after" string="% nuevo"/>
+                            <field name="price_unit_ref"/>
+                            <field name="price_unit_before"/>
+                            <field name="price_unit_after"/>
+                            <field name="subtotal_before"/>
+                            <field name="subtotal_after"/>
+                            <field name="total_before" optional="hide"/>
+                            <field name="total_after" optional="hide"/>
+                            <field name="currency_id" column_invisible="1"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cva_history" model="ir.actions.act_window">
+        <field name="name">Historial administrativo</field>
+        <field name="res_model">sale.cva.history</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'create': False}</field>
+    </record>
+</odoo>

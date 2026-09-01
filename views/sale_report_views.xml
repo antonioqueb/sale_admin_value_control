@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Análisis administrativo de ventas: pivote sobre sale.report con las
+         medidas administrativas junto a las registradas y la diferencia. -->
+    <record id="action_cva_sale_analysis" model="ir.actions.act_window">
+        <field name="name">Análisis administrativo de ventas</field>
+        <field name="res_model">sale.report</field>
+        <field name="view_mode">pivot,graph</field>
+        <field name="domain">[('state', 'not in', ('draft', 'sent'))]</field>
+        <field name="context">{
+            'pivot_measures': ['x_cva_price_subtotal', 'price_subtotal', 'x_cva_amount_diff'],
+            'pivot_row_groupby': ['user_id'],
+            'pivot_column_groupby': ['date:month'],
+            'graph_measure': 'x_cva_price_subtotal',
+            'graph_groupbys': ['user_id'],
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Sin datos todavía</p>
+            <p>Compara el valor registrado, el valor administrativo y la
+               diferencia por vendedor, cliente, producto, equipo y periodo.</p>
+        </field>
+    </record>
+
+    <!-- Facturación administrativa: análisis de facturas con las columnas
+         administrativas junto a las registradas. -->
+    <record id="action_cva_invoice_analysis" model="ir.actions.act_window">
+        <field name="name">Facturación administrativa</field>
+        <field name="res_model">account.invoice.report</field>
+        <field name="view_mode">pivot,graph</field>
+        <field name="domain">[('move_type', 'in', ('out_invoice', 'out_refund')), ('state', '=', 'posted')]</field>
+        <field name="context">{
+            'pivot_measures': ['x_cva_price_subtotal', 'price_subtotal'],
+            'pivot_row_groupby': ['invoice_user_id'],
+            'pivot_column_groupby': ['invoice_date:month'],
+        }</field>
+    </record>
+
+    <!-- Ventas con control administrativo (lista) -->
+    <record id="action_cva_orders" model="ir.actions.act_window">
+        <field name="name">Ventas con control administrativo</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('x_cva_active', '=', True)]</field>
+        <field name="context">{'search_default_group_cva_state': 1}</field>
+    </record>
+</odoo>

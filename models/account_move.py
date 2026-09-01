@@ -196,3 +196,10 @@ class AccountMove(models.Model):
             if opt in self._fields:
                 m[opt] = _scaled(opt)
         return m
+
+    def action_cva_print_invoice(self):
+        """Impresión administrativa de la factura: usa la plantilla estándar a
+        través de la ruta interactiva /report/, que es la única donde la lente
+        aplica. El PDF legal (Enviar e imprimir) sigue saliendo real."""
+        self.ensure_one()
+        return self.env.ref('account.account_invoices').report_action(self)

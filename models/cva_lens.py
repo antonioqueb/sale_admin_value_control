@@ -86,6 +86,7 @@ class CvaLensMixin(models.AbstractModel):
                     except Exception:  # noqa: BLE001 - la lente nunca debe tumbar una lectura
                         _logger.exception('[CVA] lente: no se pudo ajustar %s en %s', name, rec)
 
+    @api.readonly
     def web_read(self, specification):
         res = super().web_read(specification)
         if res and self._cva_lens_active():
@@ -93,6 +94,7 @@ class CvaLensMixin(models.AbstractModel):
         return res
 
     @api.model
+    @api.readonly
     def search_read(self, domain=None, fields=None, offset=0, limit=None, order=None, **read_kwargs):
         res = super().search_read(domain=domain, fields=fields, offset=offset,
                                   limit=limit, order=order, **read_kwargs)
@@ -103,6 +105,7 @@ class CvaLensMixin(models.AbstractModel):
         return res
 
     @api.model
+    @api.readonly
     def formatted_read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None):
         if not self._cva_lens_active():
             return super().formatted_read_group(domain, groupby, aggregates, having, offset, limit, order)

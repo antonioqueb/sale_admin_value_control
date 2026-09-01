@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Factura de cliente: aviso de lente + impresión administrativa.
+         El botón de impresión usa la ruta interactiva /report/, así que sale
+         con la lente; el PDF legal de Enviar e imprimir sigue siendo real. -->
+    <record id="view_move_form_cva" model="ir.ui.view">
+        <field name="name">account.move.form.cva</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_cva_print_invoice"
+                        string="Imprimir (administrativa)"
+                        type="object" class="btn-secondary" icon="fa-print"
+                        groups="sale_admin_value_control.group_cva_manager"
+                        invisible="move_type not in ('out_invoice', 'out_refund') or not x_cva_lens_on"/>
+            </xpath>
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-info" role="alert"
+                     groups="sale_admin_value_control.group_cva_manager"
+                     invisible="not x_cva_lens_on">
+                    <strong>VISTA ADMINISTRATIVA:</strong> los importes de esta
+                    factura se muestran con el ajuste administrativo. La
+                    contabilidad, el PDF legal y lo que ve el cliente siguen
+                    siendo los valores reales.
+                </div>
+                <field name="x_cva_lens_on" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_payment_form_cva" model="ir.ui.view">
+        <field name="name">account.payment.form.cva</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-info" role="alert"
+                     groups="sale_admin_value_control.group_cva_manager"
+                     invisible="not x_cva_lens_on">
+                    <strong>VISTA ADMINISTRATIVA:</strong> el importe mostrado
+                    lleva el ajuste administrativo de las facturas conciliadas.
+                    El pago registrado conserva su importe real.
+                </div>
+                <field name="x_cva_lens_on" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_cva_root"
+              name="Control de Valor Administrativo"
+              sequence="76"
+              groups="sale_admin_value_control.group_cva_user"/>
+
+    <menuitem id="menu_cva_orders"
+              name="Ventas con control"
+              parent="menu_cva_root"
+              action="action_cva_orders"
+              sequence="10"
+              groups="sale_admin_value_control.group_cva_user"/>
+
+    <menuitem id="menu_cva_reports"
+              name="Reportes"
+              parent="menu_cva_root"
+              sequence="20"
+              groups="sale_admin_value_control.group_cva_user"/>
+
+    <menuitem id="menu_cva_sale_analysis"
+              name="Análisis administrativo de ventas"
+              parent="menu_cva_reports"
+              action="action_cva_sale_analysis"
+              sequence="10"
+              groups="sale_admin_value_control.group_cva_user"/>
+
+    <menuitem id="menu_cva_invoice_analysis"
+              name="Facturación administrativa"
+              parent="menu_cva_reports"
+              action="action_cva_invoice_analysis"
+              sequence="20"
+              groups="sale_admin_value_control.group_cva_user"/>
+
+    <menuitem id="menu_cva_history"
+              name="Historial"
+              parent="menu_cva_root"
+              action="action_cva_history"
+              sequence="30"
+              groups="sale_admin_value_control.group_cva_user"/>
+
+    <menuitem id="menu_cva_config"
+              name="Configuración"
+              parent="menu_cva_root"
+              sequence="90"
+              groups="sale_admin_value_control.group_cva_manager"/>
+
+    <menuitem id="menu_cva_quick_percent"
+              name="Porcentajes rápidos"
+              parent="menu_cva_config"
+              action="action_cva_quick_percent"
+              sequence="10"
+              groups="sale_admin_value_control.group_cva_manager"/>
+</odoo>

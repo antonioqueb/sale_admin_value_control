@@ -244,6 +244,25 @@ class SaleOrder(models.Model):
         return m
 
     # ------------------------------------------------------------------
+    # Candado de escritura: los campos administrativos manuales sólo los
+    # escribe el Administrador CVA (la protección de grupo del campo dejaría
+    # pasar a Consulta, que es de sólo lectura por especificación).
+    # ------------------------------------------------------------------
+    _CVA_MANUAL_FIELDS = ('x_cva_active', 'x_cva_percent', 'x_cva_state',
+                          'x_cva_user_id', 'x_cva_date', 'x_cva_reason')
+
+    def write(self, vals):
+        if any(f in vals for f in self._CVA_MANUAL_FIELDS):
+            self._cva_check_manager()
+        return super().write(vals)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if any(f in vals for vals in vals_list for f in self._CVA_MANUAL_FIELDS):
+            self._cva_check_manager()
+        return super().create(vals_list)
+
+    # ------------------------------------------------------------------
     # Acciones (botones)
     # ------------------------------------------------------------------
     def _cva_check_manager(self):

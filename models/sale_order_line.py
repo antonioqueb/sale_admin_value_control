@@ -58,6 +58,20 @@ class SaleOrderLine(models.Model):
     x_cva_write_date = fields.Datetime(
         string='Última modificación adm.', copy=False, groups=CVA_USER)
 
+    _CVA_MANUAL_FIELDS = ('x_cva_has_override', 'x_cva_percent_override',
+                          'x_cva_write_uid', 'x_cva_write_date')
+
+    def write(self, vals):
+        if any(f in vals for f in self._CVA_MANUAL_FIELDS):
+            self.env['sale.order']._cva_check_manager()
+        return super().write(vals)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if any(f in vals for vals in vals_list for f in self._CVA_MANUAL_FIELDS):
+            self.env['sale.order']._cva_check_manager()
+        return super().create(vals_list)
+
     @api.constrains('x_cva_percent_override')
     def _check_x_cva_percent_override(self):
         for line in self:

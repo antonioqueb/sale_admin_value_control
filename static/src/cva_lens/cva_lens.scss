@@ -1,0 +1,34 @@
+.o_cva_lens_systray {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #adb5bd;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    padding: 2px 12px;
+    margin: 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    line-height: 1.6;
+
+    .o_cva_dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #6c757d;
+        display: inline-block;
+    }
+
+    &.o_cva_on {
+        border-color: #0e7c6b;
+        background: #0e7c6b;
+        color: #ffffff;
+
+        .o_cva_dot {
+            background: #7ef0d8;
+        }
+    }
+}

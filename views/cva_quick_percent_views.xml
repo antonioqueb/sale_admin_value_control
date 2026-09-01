@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cva_quick_percent_list" model="ir.ui.view">
+        <field name="name">sale.cva.quick.percent.list</field>
+        <field name="model">sale.cva.quick.percent</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="percent"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_cva_quick_percent" model="ir.actions.act_window">
+        <field name="name">Porcentajes rápidos</field>
+        <field name="res_model">sale.cva.quick.percent</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>

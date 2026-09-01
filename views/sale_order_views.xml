@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ══════════ Formulario de la orden ══════════ -->
+    <record id="view_order_form_cva" model="ir.ui.view">
+        <field name="name">sale.order.form.cva</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header" position="inside">
+                <button name="action_cva_open_apply_wizard"
+                        string="Aplicar ajuste administrativo"
+                        type="object" class="btn-secondary" icon="fa-percent"
+                        groups="sale_admin_value_control.group_cva_manager"
+                        invisible="state == 'cancel'"/>
+                <button name="action_cva_open_reset_wizard"
+                        string="Restablecer valor administrativo"
+                        type="object" class="btn-secondary" icon="fa-undo"
+                        groups="sale_admin_value_control.group_cva_manager"
+                        invisible="not x_cva_active"/>
+            </xpath>
+
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-info" role="alert"
+                     groups="sale_admin_value_control.group_cva_manager"
+                     invisible="not x_cva_lens_on">
+                    <strong>VISTA ADMINISTRATIVA:</strong> los importes de esta
+                    pantalla llevan el ajuste administrativo aplicado. Apágala
+                    desde la barra superior para ver y editar los valores reales.
+                </div>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_cva_view_history" type="object"
+                        class="oe_stat_button" icon="fa-history"
+                        groups="sale_admin_value_control.group_cva_user"
+                        invisible="x_cva_history_count == 0">
+                    <field name="x_cva_history_count" widget="statinfo"
+                           string="Hist. administrativo"/>
+                </button>
+            </xpath>
+
+            <!-- Columnas administrativas en las líneas: opcionales y OCULTAS
+                 por defecto; sólo las ven los grupos CVA. -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='price_subtotal']" position="after">
+                <field name="x_cva_percent" optional="hide" string="% Adm."
+                       groups="sale_admin_value_control.group_cva_user"/>
+                <field name="x_cva_price_subtotal" optional="hide" string="Subtotal Adm."
+                       groups="sale_admin_value_control.group_cva_user"/>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Control administrativo" name="cva_page"
+                      groups="sale_admin_value_control.group_cva_user">
+                    <field name="x_cva_lens_on" invisible="1"/>
+                    <group>
+                        <group string="Estado del control">
+                            <field name="x_cva_state" widget="badge"
+                                   decoration-success="x_cva_state == 'applied'"
+                                   decoration-warning="x_cva_state == 'reset'"/>
+                            <field name="x_cva_active"/>
+                            <field name="x_cva_percent" string="% general"/>
+                            <field name="x_cva_user_id"/>
+                            <field name="x_cva_date"/>
+                            <field name="x_cva_reason"/>
+                        </group>
+                        <group string="Registrado vs. administrativo">
+                            <field name="amount_total" string="Total registrado" readonly="1"/>
+                            <field name="x_cva_amount_untaxed"/>
+                            <field name="x_cva_amount_tax"/>
+                            <field name="x_cva_amount_total"/>
+                            <field name="x_cva_amount_diff"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Pagos (indicador, no genera cobranza)">
+                            <field name="x_cva_paid_amount"/>
+                            <field name="x_cva_paid_amount_adm"/>
+                            <field name="x_cva_balance_adm"/>
+                        </group>
+                    </group>
+                    <field name="x_cva_payments_html" nolabel="1" readonly="1"/>
+                    <separator string="Detalle por línea"/>
+                    <field name="x_cva_line_ids" readonly="1">
+                        <list create="false" delete="false" edit="false">
+                            <field name="product_id"/>
+                            <field name="product_uom_qty" string="Cantidad"/>
+                            <field name="price_unit" string="Precio registrado"/>
+                            <field name="discount" string="Desc. comercial %" optional="show"/>
+                            <field name="x_cva_price_unit_ref" string="Precio referencia"/>
+                            <field name="x_cva_percent" string="% Adm."/>
+                            <field name="x_cva_percent_inherited" string="Heredado" optional="show"/>
+                            <field name="x_cva_price_unit" string="Precio Adm."/>
+                            <field name="x_cva_price_subtotal" string="Subtotal Adm."/>
+                            <field name="x_cva_price_total" string="Total Adm."/>
+                            <field name="x_cva_write_uid" optional="hide"/>
+                            <field name="x_cva_write_date" optional="hide"/>
+                            <field name="currency_id" column_invisible="1"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ══════════ Lista de órdenes ══════════ -->
+    <record id="view_order_tree_cva" model="ir.ui.view">
+        <field name="name">sale.order.list.cva</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_total']" position="after">
+                <field name="x_cva_state" optional="hide" string="Estado Adm."
+                       groups="sale_admin_value_control.group_cva_user"/>
+                <field name="x_cva_percent" optional="hide" string="% Adm."
+                       groups="sale_admin_value_control.group_cva_user"/>
+                <field name="x_cva_amount_total" optional="hide" string="Total Adm." sum="Suma"
+                       groups="sale_admin_value_control.group_cva_user"/>
+                <field name="x_cva_amount_diff" optional="hide" string="Dif. Adm." sum="Suma"
+                       groups="sale_admin_value_control.group_cva_user"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_quotation_tree_cva" model="ir.ui.view">
+        <field name="name">sale.order.quotation.list.cva</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_total']" position="after">
+                <field name="x_cva_state" optional="hide" string="Estado Adm."
+                       groups="sale_admin_value_control.group_cva_user"/>
+                <field name="x_cva_amount_total" optional="hide" string="Total Adm." sum="Suma"
+                       groups="sale_admin_value_control.group_cva_user"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ══════════ Búsqueda ══════════ -->
+    <record id="view_sales_order_filter_cva" model="ir.ui.view">
+        <field name="name">sale.order.search.cva</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator groups="sale_admin_value_control.group_cva_user"/>
+                <filter string="Con control administrativo" name="cva_active"
+                        domain="[('x_cva_active', '=', True)]"
+                        groups="sale_admin_value_control.group_cva_user"/>
+                <filter string="Sin control administrativo" name="cva_none"
+                        domain="[('x_cva_active', '=', False)]"
+                        groups="sale_admin_value_control.group_cva_user"/>
+                <filter string="Restablecidas" name="cva_reset"
+                        domain="[('x_cva_state', '=', 'reset')]"
+                        groups="sale_admin_value_control.group_cva_user"/>
+                <filter string="Estado administrativo" name="group_cva_state"
+                        context="{'group_by': 'x_cva_state'}"
+                        groups="sale_admin_value_control.group_cva_user"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
