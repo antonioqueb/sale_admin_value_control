@@ -9,13 +9,13 @@
 
             <xpath expr="//header" position="inside">
                 <button name="action_cva_open_apply_wizard"
-                        string="Aplicar ajuste administrativo"
-                        type="object" class="btn-secondary" icon="fa-percent"
+                        string="% Ajuste"
+                        type="object" class="btn-secondary"
                         groups="sale_admin_value_control.group_cva_manager"
                         invisible="state == 'cancel'"/>
                 <button name="action_cva_open_reset_wizard"
-                        string="Restablecer valor administrativo"
-                        type="object" class="btn-secondary" icon="fa-undo"
+                        string="Quitar % ajuste"
+                        type="object" class="btn-secondary"
                         groups="sale_admin_value_control.group_cva_manager"
                         invisible="not x_cva_active"/>
             </xpath>
