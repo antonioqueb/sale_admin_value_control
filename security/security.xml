@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="module_category_cva" model="ir.module.category">
+            <field name="name">Control de Valor Administrativo</field>
+            <field name="description">Ajuste administrativo interno sobre órdenes de venta.</field>
+            <field name="sequence">25</field>
+        </record>
+
+        <record id="privilege_cva" model="res.groups.privilege">
+            <field name="name">Control de Valor Administrativo</field>
+            <field name="category_id" ref="module_category_cva"/>
+            <field name="sequence">25</field>
+        </record>
+
+        <!-- Consulta: ve el porcentaje, los valores administrativos, el
+             historial y los reportes. No aplica ni restablece. -->
+        <record id="group_cva_user" model="res.groups">
+            <field name="name">Consulta</field>
+            <field name="privilege_id" ref="privilege_cva"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Puede consultar el porcentaje aplicado, los valores
+                administrativos, el historial y los reportes administrativos.
+                No puede crear, modificar ni restablecer ajustes.</field>
+        </record>
+
+        <!-- Administrador: aplica/restablece y tiene la LENTE administrativa
+             (todo lo que ve lleva el ajuste aplicado). Pensado para UN usuario
+             específico. Ningún grupo nativo lo implica. -->
+        <record id="group_cva_manager" model="res.groups">
+            <field name="name">Administrador</field>
+            <field name="privilege_id" ref="privilege_cva"/>
+            <field name="implied_ids" eval="[(4, ref('group_cva_user'))]"/>
+            <field name="comment">Aplica y restablece porcentajes, configura los
+                porcentajes rápidos y ve TODO el sistema con el ajuste
+                administrativo aplicado (lente administrativa).</field>
+        </record>
+
+        <!-- Subtipo de chatter exclusivo: interno, sin suscripción por defecto. -->
+        <record id="mt_cva" model="mail.message.subtype">
+            <field name="name">Control administrativo</field>
+            <field name="res_model">sale.order</field>
+            <field name="internal" eval="True"/>
+            <field name="default" eval="False"/>
+            <field name="hidden" eval="True"/>
+            <field name="description">Aplicación o restablecimiento de ajuste administrativo</field>
+        </record>
+    </data>
+
+    <data noupdate="1">
+        <!-- Visibilidad del chatter: las reglas por grupo se unen con OR.
+             Un usuario interno sin el grupo sólo cumple la primera (excluye el
+             subtipo); un usuario CVA cumple la segunda (ve todo). -->
+        <record id="rule_mail_message_cva_hide" model="ir.rule">
+            <field name="name">Chatter CVA: ocultar a usuarios sin permiso</field>
+            <field name="model_id" ref="mail.model_mail_message"/>
+            <field name="domain_force">['|', ('subtype_id', '=', False), ('subtype_id', '!=', ref('sale_admin_value_control.mt_cva'))]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+        <record id="rule_mail_message_cva_show" model="ir.rule">
+            <field name="name">Chatter CVA: visible para Control de Valor Administrativo</field>
+            <field name="model_id" ref="mail.model_mail_message"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_cva_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+    </data>
+</odoo>

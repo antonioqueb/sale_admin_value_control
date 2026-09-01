@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cva_history_user,sale.cva.history consulta,model_sale_cva_history,group_cva_user,1,0,0,0
+access_cva_history_line_user,sale.cva.history.line consulta,model_sale_cva_history_line,group_cva_user,1,0,0,0
+access_cva_quick_percent_user,sale.cva.quick.percent consulta,model_sale_cva_quick_percent,group_cva_user,1,0,0,0
+access_cva_quick_percent_manager,sale.cva.quick.percent administrador,model_sale_cva_quick_percent,group_cva_manager,1,1,1,1
+access_cva_apply_wizard_manager,sale.cva.apply.wizard administrador,model_sale_cva_apply_wizard,group_cva_manager,1,1,1,1
+access_cva_apply_wizard_line_manager,sale.cva.apply.wizard.line administrador,model_sale_cva_apply_wizard_line,group_cva_manager,1,1,1,1
+access_cva_reset_wizard_manager,sale.cva.reset.wizard administrador,model_sale_cva_reset_wizard,group_cva_manager,1,1,1,1
