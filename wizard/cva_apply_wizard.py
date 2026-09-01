@@ -119,7 +119,7 @@ class SaleCvaApplyWizardLine(models.TransientModel):
     line_id = fields.Many2one(
         'sale.order.line', string='Línea', required=True, ondelete='cascade')
     product_id = fields.Many2one(related='line_id.product_id')
-    name = fields.Char(related='line_id.name', string='Descripción')
+    name = fields.Text(related='line_id.name', string='Descripción')
     qty = fields.Float(related='line_id.product_uom_qty', string='Cantidad')
     price_unit_ref = fields.Float(
         related='line_id.x_cva_price_unit_ref', string='Precio referencia')
