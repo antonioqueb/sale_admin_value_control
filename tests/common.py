@@ -59,11 +59,20 @@ class CvaCase(TransactionCase):
                 'discount': discount,
                 'tax_ids': [(6, 0, taxes.ids if taxes else [])],
             }))
-        return self.env['sale.order'].create({
+        order = self.env['sale.order'].create({
             'partner_id': self.partner.id,
             'user_id': self.user_salesman.id,
             'order_line': lines,
         })
+        # inventory_shopping_cart FUERZA IVA 16 en toda línea salvo orden con
+        # exención aprobada: las pruebas controlan los impuestos por línea,
+        # así que se aprueba la exención y se fijan los impuestos pedidos.
+        if 'x_iva_exempt_state' in order._fields:
+            order.x_iva_exempt_state = 'approved'
+        order.order_line.filtered(lambda l: not l.display_type).with_context(
+            som_skip_iva_force=True).write(
+            {'tax_ids': [(6, 0, taxes.ids if taxes else [])]})
+        return order
 
     def _apply(self, order, percent, scope='order', line_ids=None,
                reason='PRUEBA AUTOMÁTICA', **kw):
