@@ -21,6 +21,9 @@ class CvaCase(TransactionCase):
             'invoice_policy': 'order',
             'list_price': 100.0,
         })
+        # La BD de QA asigna el IVA por defecto de la compañía al producto;
+        # las pruebas controlan los impuestos por línea, así que se limpia.
+        cls.service.taxes_id = [(5, 0, 0)]
         cls.tax16 = cls.env['account.tax'].create({
             'name': 'IVA 16 CVA TEST',
             'amount': 16.0,

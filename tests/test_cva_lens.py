@@ -152,8 +152,10 @@ class TestCvaLens(CvaCase):
     def test_11_sale_report_columns(self):
         self.order.action_confirm()
         self.env.flush_all()
+        # state='sale' excluye la COT/ de respaldo archivada que crea el flujo
+        # STONE al confirmar (duplica la cotización con los mismos montos).
         rows = self.env['sale.report'].with_user(self.user_consulta).search_read(
-            [('partner_id', '=', self.partner.id)],
+            [('partner_id', '=', self.partner.id), ('state', '=', 'sale')],
             ['price_subtotal', 'x_cva_price_subtotal', 'x_cva_amount_diff'])
         total_ref = sum(r['price_subtotal'] for r in rows)
         total_adm = sum(r['x_cva_price_subtotal'] for r in rows)

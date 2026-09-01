@@ -12,6 +12,8 @@ valores ajustados sin modificar el QWeb.
 Compatible con ``t-field`` (usa ``record._fields[name]`` y ``record[name]``)
 y con ``web.external_layout`` (``'company_id' in o``, ``o.company_id.sudo()``).
 """
+import inspect
+
 from odoo import models
 
 
@@ -83,7 +85,9 @@ class CvaProxy:
         if name in ('filtered', 'sorted', 'mapped', 'grouped', 'filtered_domain'):
             return getattr(self, '_cva_' + name)
         value = getattr(rec, name)
-        if callable(value) and not isinstance(value, models.BaseModel):
+        # OJO: sólo se envuelven MÉTODOS/funciones. `callable` a secas atrapaba
+        # a Environment (es invocable) y rompía `record.env[...]` en QWeb.
+        if inspect.ismethod(value) or inspect.isfunction(value):
             def _call(*args, **kwargs):
                 args = tuple(cva_unwrap(a) for a in args)
                 kwargs = {k: cva_unwrap(v) for k, v in kwargs.items()}

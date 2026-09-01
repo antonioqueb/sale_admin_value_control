@@ -75,8 +75,10 @@ class AccountMoveLine(models.Model):
                 continue
             company = line.company_id or self.env.company
             try:
-                base_line = line._prepare_base_line_for_taxes_computation(
-                    price_unit=(line.price_unit or 0.0) * factor)
+                # account.move.line no expone el preparador en 19: se usa el
+                # genérico de account.tax (record + overrides).
+                base_line = AccountTax._prepare_base_line_for_taxes_computation(
+                    line, price_unit=(line.price_unit or 0.0) * factor)
                 AccountTax._add_tax_details_in_base_line(base_line, company)
                 AccountTax._round_base_lines_tax_details([base_line], company)
                 details = base_line['tax_details']
@@ -169,8 +171,8 @@ class AccountMove(models.Model):
         base_lines = []
         for line in lines:
             factor = 1.0 - (line.x_cva_percent or 0.0) / 100.0
-            base_lines.append(line._prepare_base_line_for_taxes_computation(
-                price_unit=(line.price_unit or 0.0) * factor))
+            base_lines.append(AccountTax._prepare_base_line_for_taxes_computation(
+                line, price_unit=(line.price_unit or 0.0) * factor))
         AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
         AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
         return AccountTax._get_tax_totals_summary(
