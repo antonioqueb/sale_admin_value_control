@@ -3,6 +3,7 @@
     <menuitem id="menu_cva_root"
               name="Control de Valor Administrativo"
               sequence="76"
+              web_icon="sale_admin_value_control,static/description/icon.svg"
               groups="sale_admin_value_control.group_cva_user"/>
 
     <menuitem id="menu_cva_orders"

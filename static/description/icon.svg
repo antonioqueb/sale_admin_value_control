@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140">
+  <!-- Control de Valor Administrativo: dos mundos (registrado azul /
+       administrativo verde-azulado) partidos por la diagonal del % -->
+  <defs>
+    <clipPath id="r">
+      <rect x="0" y="0" width="140" height="140" rx="30" ry="30"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#r)">
+    <rect x="0" y="0" width="140" height="140" fill="#1E4E8C"/>
+    <path d="M0 140 L140 0 L140 140 Z" fill="#0E7C6B"/>
+    <!-- barra del % sobre la misma diagonal del corte -->
+    <line x1="41" y1="105" x2="99" y2="35" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round"/>
+    <!-- anillos del % -->
+    <circle cx="45" cy="45" r="19" fill="none" stroke="#FFFFFF" stroke-width="12"/>
+    <circle cx="95" cy="95" r="19" fill="none" stroke="#FFFFFF" stroke-width="12"/>
+  </g>
+</svg>
