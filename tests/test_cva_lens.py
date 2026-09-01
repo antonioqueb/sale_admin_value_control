@@ -99,7 +99,8 @@ class TestCvaLens(CvaCase):
             {'amount_total': {}, 'amount_residual': {}})[0]
         self.assertAlmostEqual(ivals['amount_total'], 60.0)
         self.assertAlmostEqual(ivals['amount_residual'], 60.0)
-        # pago completo real de $100
+        # pago completo real de $100 — en este build nace in_process SIN
+        # asiento, ligado a la factura (Odoo 19)
         register = self.env['account.payment.register'].with_context(
             active_model='account.move', active_ids=invoice.ids).create({})
         payments = register._create_payments()
@@ -109,7 +110,32 @@ class TestCvaLens(CvaCase):
         pvals = self._mgr('account.payment').browse(payment.id).web_read(
             {'amount': {}})[0]
         self.assertAlmostEqual(pvals['amount'], 60.0, places=2)
-        # indicadores de la orden
+        # conciliación real (como la haría el estado de cuenta): asiento
+        # banco → clientes conciliado contra la factura
+        recv_line = invoice.line_ids.filtered(
+            lambda l: l.account_id.account_type == 'asset_receivable')
+        journal = self.env['account.journal'].search(
+            [('type', '=', 'bank'), ('company_id', '=', self.company.id)],
+            limit=1)
+        cash_account = journal.default_account_id
+        if not cash_account:
+            cash_account = self.env['account.account'].search(
+                [('account_type', '=', 'asset_cash')], limit=1)
+        entry = self.env['account.move'].create({
+            'move_type': 'entry',
+            'journal_id': journal.id,
+            'line_ids': [
+                (0, 0, {'account_id': cash_account.id, 'debit': 100.0,
+                        'partner_id': self.partner.id}),
+                (0, 0, {'account_id': recv_line.account_id.id, 'credit': 100.0,
+                        'partner_id': self.partner.id}),
+            ],
+        })
+        entry.action_post()
+        credit_line = entry.line_ids.filtered(lambda l: l.credit > 0)
+        (credit_line + recv_line).reconcile()
+        self.assertAlmostEqual(invoice.amount_residual, 0.0)
+        # indicadores de la orden con el cobro conciliado
         self.assertAlmostEqual(order.x_cva_paid_amount, 100.0)
         self.assertAlmostEqual(order.x_cva_paid_amount_adm, 60.0, places=2)
         self.assertAlmostEqual(order.x_cva_balance_adm, 0.0, places=2)

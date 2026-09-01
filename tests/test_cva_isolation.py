@@ -62,8 +62,12 @@ class TestCvaIsolation(CvaCase):
         self.assertAlmostEqual(payment.amount, 100.0)
         self.assertAlmostEqual(order.x_cva_amount_total, 60.0)
         self.assertAlmostEqual(order.x_cva_amount_diff, 40.0)
-        self.assertAlmostEqual(invoice.amount_residual, 0.0)
-        self.assertEqual(invoice.payment_state in ('paid', 'in_payment'), True)
+        self.assertAlmostEqual(payment.x_cva_amount, 60.0, places=2)
+        # el ajuste no tocó la contabilidad: el pago sigue in_process (sin
+        # asiento en este build) y el residual de la factura sigue íntegro
+        self.assertIn(payment.state, ('in_process', 'paid', 'posted'))
+        self.assertAlmostEqual(invoice.amount_residual, 100.0)
+        self.assertIn(invoice.payment_state, ('in_payment', 'paid', 'not_paid'))
 
     def test_03_copy_starts_clean(self):
         order = self._make_order(price=100.0)

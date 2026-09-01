@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Control de Valor Administrativo',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.1.1',
     'category': 'Sales/Sales',
     'summary': 'Porcentaje de ajuste administrativo sobre órdenes de venta con '
                'valores paralelos, lente de presentación y trazabilidad',

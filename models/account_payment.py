@@ -21,7 +21,8 @@ class AccountPayment(models.Model):
         help='Importe del pago ajustado por la proporción administrativa de '
              'las facturas conciliadas. El importe real del pago no cambia.')
 
-    @api.depends('amount', 'currency_id', 'partner_type', 'payment_type')
+    @api.depends('amount', 'currency_id', 'partner_type', 'payment_type',
+                 'invoice_ids')
     def _compute_x_cva_amount(self):
         for pay in self:
             pay.x_cva_amount = pay._cva_amount_value()
@@ -37,20 +38,29 @@ class AccountPayment(models.Model):
                 lambda l: l.account_id.account_type in
                 ('asset_receivable', 'liability_payable'))
             partials = lines.matched_debit_ids | lines.matched_credit_ids
-            adjustment = 0.0
-            for partial in partials:
-                if partial.debit_move_id in lines:
-                    other = partial.credit_move_id
-                    matched = partial.debit_amount_currency
-                else:
-                    other = partial.debit_move_id
-                    matched = partial.credit_amount_currency
-                other_move = other.move_id.sudo()
-                if other_move.move_type in CUSTOMER_MOVE_TYPES and other_move.amount_total:
-                    ratio = (other_move.x_cva_amount_total or 0.0) / other_move.amount_total
-                    adjustment += (matched or 0.0) * (1.0 - ratio)
-            return amount - adjustment
-        invoices = self.sudo().reconciled_invoice_ids
+            if partials:
+                adjustment = 0.0
+                for partial in partials:
+                    if partial.debit_move_id in lines:
+                        other = partial.credit_move_id
+                        matched = partial.debit_amount_currency
+                    else:
+                        other = partial.debit_move_id
+                        matched = partial.credit_amount_currency
+                    other_move = other.move_id.sudo()
+                    if other_move.move_type in CUSTOMER_MOVE_TYPES and other_move.amount_total:
+                        ratio = (other_move.x_cva_amount_total or 0.0) / other_move.amount_total
+                        adjustment += (matched or 0.0) * (1.0 - ratio)
+                return amount - adjustment
+        # Odoo 19: los pagos pueden nacer 'in_process' SIN asiento, ligados a
+        # sus facturas vía invoice_ids; el administrativo sale de ese vínculo.
+        invoices = self.env['account.move']
+        if 'invoice_ids' in self._fields:
+            invoices = self.sudo().invoice_ids
+        if not invoices:
+            invoices = self.sudo().reconciled_invoice_ids
+        invoices = invoices.filtered(
+            lambda m: m.move_type in CUSTOMER_MOVE_TYPES)
         if invoices:
             total = sum(invoices.mapped('amount_total'))
             adm = sum(invoices.mapped('x_cva_amount_total'))
