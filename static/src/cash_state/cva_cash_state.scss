@@ -1,0 +1,68 @@
+// Estatus administrativo de Entradas de Caja (semáforo con un clic)
+.o_cva_dstate {
+    position: relative;
+    display: inline-block;
+
+    .o_cva_dstate_badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        line-height: 1.4;
+        white-space: nowrap;
+        cursor: pointer;
+        background: #f1f5f9;
+        color: #334155;
+        &.is-readonly { cursor: default; }
+        &:not(.is-readonly):hover { filter: brightness(0.96); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); }
+        .o_cva_dstate_dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: 0.85; }
+        .o_cva_dstate_caret { font-size: 0.7rem; opacity: 0.7; margin-left: 2px; }
+    }
+    .o_cva_dstate_pending { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+    .o_cva_dstate_partial { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+    .o_cva_dstate_deposited { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+
+    .o_cva_dstate_menu {
+        position: absolute;
+        z-index: 1050;
+        top: calc(100% + 4px);
+        left: 0;
+        min-width: 150px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+        padding: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .o_cva_dstate_item {
+        border: 0;
+        background: transparent;
+        text-align: left;
+        padding: 3px 4px;
+        border-radius: 8px;
+        cursor: pointer;
+        &:hover { background: #f8fafc; }
+        &.is-current { background: #f1f5f9; }
+    }
+}
+
+// Pedidos como enlaces en la lista
+.o_cva_links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    .o_cva_link {
+        color: #1d4ed8;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+        &:hover { text-decoration: underline; }
+    }
+}

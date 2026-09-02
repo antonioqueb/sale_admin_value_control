@@ -11,4 +11,5 @@ from . import sale_order
 from . import account_move
 from . import account_payment
 from . import cash_receipt
+from . import cash_entry
 from . import sale_report

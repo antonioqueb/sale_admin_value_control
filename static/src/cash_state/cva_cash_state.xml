@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="sale_admin_value_control.CvaDepositStateField">
+    <div class="o_cva_dstate" t-ref="root">
+        <button type="button"
+                t-att-class="'o_cva_dstate_badge ' + stateClass(value) + (props.readonly ? ' is-readonly' : '')"
+                t-att-title="props.readonly ? label : 'Clic para cambiar el estatus administrativo'"
+                t-on-click="toggle">
+            <span class="o_cva_dstate_dot"/><t t-esc="label"/>
+            <span t-if="!props.readonly" class="o_cva_dstate_caret">▾</span>
+        </button>
+        <div class="o_cva_dstate_menu" t-if="state.open">
+            <t t-foreach="options" t-as="opt" t-key="opt[0]">
+                <button type="button"
+                        t-att-class="'o_cva_dstate_item ' + (opt[0] === value ? 'is-current' : '')"
+                        t-on-click="(ev) => this.select(ev, opt[0])">
+                    <span t-att-class="'o_cva_dstate_badge ' + stateClass(opt[0])"><span class="o_cva_dstate_dot"/><t t-esc="opt[1]"/></span>
+                </button>
+            </t>
+        </div>
+    </div>
+</t>
+
+<t t-name="sale_admin_value_control.CvaM2mLinksField">
+    <div class="o_cva_links">
+        <t t-foreach="records" t-as="rec" t-key="rec.id">
+            <a href="#" class="o_cva_link" t-att-title="'Abrir ' + rec.data.display_name"
+               t-on-click="(ev) => this.open(ev, rec)" t-esc="rec.data.display_name"/>
+        </t>
+    </div>
+</t>
+
+</templates>

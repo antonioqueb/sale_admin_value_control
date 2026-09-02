@@ -13,5 +13,7 @@
              actualización se purgan los mensajes que versiones anteriores
              publicaron con el subtipo mt_cva. -->
         <function model="sale.order" name="_cva_purge_chatter"/>
+        <!-- Entradas de caja canceladas = archivadas (y registradas = visibles). -->
+        <function model="cash.entry" name="_cva_archive_cancelled"/>
     </data>
 </odoo>

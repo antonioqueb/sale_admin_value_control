@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Lista: el estatus administrativo es la PRIMERA columna y se cambia
+         con un clic sobre la etiqueta (widget cva_deposit_state). El estado
+         operativo (Registrada/Cancelada) deja de mostrarse: lo cancelado se
+         archiva. Los pedidos se muestran como enlaces que abren la orden. -->
+    <record id="view_cash_entry_list_cva" model="ir.ui.view">
+        <field name="name">cash.entry.list.cva</field>
+        <field name="model">cash.entry</field>
+        <field name="inherit_id" ref="cash_receipt_voucher.view_cash_entry_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="x_cva_deposit_state" widget="cva_deposit_state"
+                       string="Estatus"
+                       groups="sale_admin_value_control.group_cva_manager"/>
+                <field name="x_cva_deposit_state" widget="cva_deposit_state"
+                       string="Estatus" readonly="1"
+                       groups="!sale_admin_value_control.group_cva_manager"/>
+            </xpath>
+            <xpath expr="//field[@name='sale_order_ids']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='sale_order_ids']" position="after">
+                <field name="x_cva_order_ids" widget="cva_m2m_links" string="Pedidos" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_cash_entry_form_cva" model="ir.ui.view">
+        <field name="name">cash.entry.form.cva</field>
+        <field name="model">cash.entry</field>
+        <field name="inherit_id" ref="cash_receipt_voucher.view_cash_entry_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='date']" position="before">
+                <field name="x_cva_deposit_state" widget="cva_deposit_state"
+                       groups="sale_admin_value_control.group_cva_manager"/>
+                <field name="x_cva_deposit_state" widget="cva_deposit_state" readonly="1"
+                       groups="!sale_admin_value_control.group_cva_manager"/>
+            </xpath>
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="active" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_cash_entry_search_cva" model="ir.ui.view">
+        <field name="name">cash.entry.search.cva</field>
+        <field name="model">cash.entry</field>
+        <field name="inherit_id" ref="cash_receipt_voucher.view_cash_entry_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='shortage']" position="before">
+                <filter string="Pendiente de depósito" name="cva_pending"
+                        domain="[('x_cva_deposit_state', '=', 'pending')]"/>
+                <filter string="Depósito parcial" name="cva_partial"
+                        domain="[('x_cva_deposit_state', '=', 'partial')]"/>
+                <filter string="Depositado" name="cva_deposited"
+                        domain="[('x_cva_deposit_state', '=', 'deposited')]"/>
+                <separator/>
+            </xpath>
+            <xpath expr="//filter[@name='not_cancelled']" position="after">
+                <filter string="Canceladas (archivadas)" name="cva_archived"
+                        domain="[('active', '=', False)]"/>
+            </xpath>
+            <xpath expr="//filter[@name='group_partner']" position="before">
+                <filter string="Estatus administrativo" name="group_cva_state"
+                        context="{'group_by': 'x_cva_deposit_state'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
