@@ -13,7 +13,8 @@ class ResUsers(models.Model):
         default=True,
         help='Sólo tiene efecto para el grupo Control de Valor Administrativo '
              '/ Administrador: encendida, todo se presenta con el ajuste '
-             'administrativo aplicado; apagada, se ve lo real.')
+             'administrativo aplicado; apagada, vista operativa (valores '
+             'registrados).')
 
     @api.model
     def _cva_lens_active(self):

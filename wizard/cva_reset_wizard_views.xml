@@ -8,13 +8,13 @@
                 <sheet>
                     <div class="alert alert-warning" role="alert">
                         Esta acción restablece el porcentaje administrativo a 0%.
-                        El historial anterior se conserva y la operación queda registrada.
+                        El historial administrativo anterior se conserva.
                     </div>
                     <group>
                         <field name="order_id" readonly="1"/>
                         <field name="currency_id" invisible="1"/>
                         <field name="summary" readonly="1" nolabel="1" colspan="2"/>
-                        <field name="reason" placeholder="Motivo del restablecimiento"/>
+                        <field name="reason" placeholder="Motivo del restablecimiento (opcional)"/>
                     </group>
                 </sheet>
                 <footer>

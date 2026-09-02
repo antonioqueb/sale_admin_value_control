@@ -9,7 +9,7 @@ class SaleCvaResetWizard(models.TransientModel):
     order_id = fields.Many2one(
         'sale.order', string='Orden', required=True, ondelete='cascade')
     currency_id = fields.Many2one(related='order_id.currency_id')
-    reason = fields.Char(string='Motivo', required=True)
+    reason = fields.Char(string='Motivo')
     summary = fields.Text(
         string='Resumen', compute='_compute_summary')
 

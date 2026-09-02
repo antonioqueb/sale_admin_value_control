@@ -19,7 +19,7 @@
                             <field name="quick_id" widget="radio"
                                    options="{'horizontal': true}"/>
                             <field name="percent"/>
-                            <field name="reason" placeholder="Motivo o referencia interna del ajuste"/>
+                            <field name="reason" placeholder="Motivo o referencia interna (opcional)"/>
                         </group>
                     </group>
                     <notebook>

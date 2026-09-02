@@ -24,7 +24,7 @@ class SaleCvaApplyWizard(models.TransientModel):
         help='Al aplicar el porcentaje general, las líneas que ya tienen un '
              'porcentaje particular lo conservan. Si se deja apagado, los '
              'particulares se limpian y toda la orden queda con el general.')
-    reason = fields.Char(string='Motivo', required=True)
+    reason = fields.Char(string='Motivo')
     line_ids = fields.One2many(
         'sale.cva.apply.wizard.line', 'wizard_id', string='Líneas')
 

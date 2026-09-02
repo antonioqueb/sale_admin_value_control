@@ -212,7 +212,7 @@ class CvaLensMixin(models.AbstractModel):
             raise UserError(_(
                 'Estás viendo el sistema con la VISTA ADMINISTRATIVA encendida, '
                 'así que los importes en pantalla llevan el ajuste aplicado. '
-                'Para modificar importes reales apaga la vista administrativa '
+                'Para modificar importes cambia a la VISTA OPERATIVA '
                 '(indicador en la barra superior) y vuelve a intentarlo.\n\n'
                 'Campos bloqueados: %s') % ', '.join(blocked))
         # comandos x2many hacia comodelos con lente (líneas del formulario)

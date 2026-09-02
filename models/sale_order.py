@@ -332,8 +332,7 @@ class SaleOrder(models.Model):
         if self.state == 'cancel':
             raise UserError(_('No se aplica ajuste administrativo sobre una '
                               'orden cancelada.'))
-        if not reason or not reason.strip():
-            raise UserError(_('Captura el motivo del ajuste.'))
+        reason = (reason or '').strip()  # opcional
         if percent < 0 or percent > 100:
             raise UserError(_('El porcentaje debe estar entre 0%% y 100%%.'))
         before = self._cva_snapshot()
@@ -345,7 +344,7 @@ class SaleOrder(models.Model):
             'x_cva_state': 'applied',
             'x_cva_user_id': user.id,
             'x_cva_date': now,
-            'x_cva_reason': reason.strip(),
+            'x_cva_reason': reason,
         }
         if scope == 'order':
             header_vals['x_cva_percent'] = percent
@@ -371,14 +370,12 @@ class SaleOrder(models.Model):
             action = 'apply_lines'
         after = self._cva_snapshot()
         self._cva_log_history(action, reason, before, after, affected)
-        self._cva_post_chatter(action, percent, reason, before, after)
         return True
 
-    def _cva_reset(self, reason):
+    def _cva_reset(self, reason=''):
         self.ensure_one()
         self._cva_check_manager()
-        if not reason or not reason.strip():
-            raise UserError(_('Captura el motivo del restablecimiento.'))
+        reason = (reason or '').strip()  # opcional
         before = self._cva_snapshot()
         now = fields.Datetime.now()
         user = self.env.user
@@ -389,7 +386,7 @@ class SaleOrder(models.Model):
             'x_cva_state': 'reset',
             'x_cva_user_id': user.id,
             'x_cva_date': now,
-            'x_cva_reason': reason.strip(),
+            'x_cva_reason': reason,
         })
         overridden = lines.filtered('x_cva_has_override')
         if overridden:
@@ -398,7 +395,6 @@ class SaleOrder(models.Model):
         lines.write({'x_cva_write_uid': user.id, 'x_cva_write_date': now})
         after = self._cva_snapshot()
         self._cva_log_history('reset', reason, before, after, lines)
-        self._cva_post_chatter('reset', 0.0, reason, before, after)
         return True
 
     def _cva_log_history(self, action, reason, before, after, lines):
@@ -427,7 +423,7 @@ class SaleOrder(models.Model):
                 'action': action,
                 'user_id': self.env.user.id,
                 'date': fields.Datetime.now(),
-                'reason': reason.strip(),
+                'reason': (reason or '').strip(),
                 'percent_before': before['percent'],
                 'percent_after': self.x_cva_percent or 0.0,
                 'amount_before': before['amount'],
@@ -436,40 +432,22 @@ class SaleOrder(models.Model):
                 'line_ids': line_vals,
             })
 
-    def _cva_post_chatter(self, action, percent, reason, before, after):
-        self.ensure_one()
-        labels = {
-            'apply_order': _('Ajuste administrativo GENERAL aplicado'),
-            'apply_lines': _('Ajuste administrativo POR LÍNEA aplicado'),
-            'reset': _('Valor administrativo RESTABLECIDO'),
-        }
-        symbol = self.currency_id.symbol or ''
-
-        def money(value):
-            return '%s%s' % (symbol, '{:,.2f}'.format(value or 0.0))
-
-        body = Markup(
-            '<p><b>%s</b></p>'
-            '<ul>'
-            '<li>Porcentaje: %s%% → %s%%</li>'
-            '<li>Total registrado: %s</li>'
-            '<li>Total administrativo: %s → %s</li>'
-            '<li>Motivo: %s</li>'
-            '</ul>') % (
-            escape(labels.get(action, action)),
-            escape('{:.2f}'.format(before['percent'])),
-            escape('{:.2f}'.format(self.x_cva_percent or 0.0)),
-            escape(money(self.amount_total)),
-            escape(money(before['amount'])),
-            escape(money(after['amount'])),
-            escape(reason.strip()),
-        )
-        try:
-            self.sudo().message_post(
-                body=body,
-                subtype_xmlid='sale_admin_value_control.mt_cva',
-                message_type='comment',
-                author_id=self.env.user.partner_id.id,
-            )
-        except Exception:  # noqa: BLE001 - el chatter nunca bloquea el ajuste
-            _logger.exception('[CVA] no se pudo publicar en el chatter de %s', self.name)
+    @api.model
+    def _cva_purge_chatter(self):
+        """Los ajustes administrativos NO dejan rastro en el chatter: ni para
+        el vendedor ni para nadie. Esta limpieza corre en cada actualización
+        del módulo (data/cva_data.xml) y elimina los mensajes que versiones
+        anteriores publicaron con el subtipo 'Control administrativo'. La
+        trazabilidad vive únicamente en el historial (sale.cva.history),
+        restringido a los grupos CVA."""
+        subtype = self.env.ref('sale_admin_value_control.mt_cva',
+                               raise_if_not_found=False)
+        if not subtype:
+            return True
+        messages = self.env['mail.message'].sudo().search(
+            [('subtype_id', '=', subtype.id)])
+        if messages:
+            _logger.info('[CVA] purgando %d mensaje(s) de chatter del control '
+                         'administrativo', len(messages))
+            messages.unlink()
+        return True

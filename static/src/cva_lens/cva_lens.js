@@ -1,5 +1,5 @@
 /** @odoo-module **/
-/* Indicador y toggle de la VISTA ADMINISTRATIVA en la barra superior.
+/* Indicador y toggle VISTA OPERATIVA / VISTA ADMINISTRATIVA en la barra superior.
  * Sólo aparece para el grupo Control de Valor Administrativo / Administrador.
  * Encendida = todo el sistema se presenta con el ajuste administrativo. */
 import { Component, xml, useState } from "@odoo/owl";
@@ -24,13 +24,13 @@ export class CvaLensSystray extends Component {
     }
 
     get label() {
-        return this.state.on ? "VISTA ADMINISTRATIVA" : "VISTA REAL";
+        return this.state.on ? "VISTA ADMINISTRATIVA" : "VISTA OPERATIVA";
     }
 
     get tooltip() {
         return this.state.on
-            ? "Estás viendo importes con el ajuste administrativo aplicado. Haz clic para ver los valores reales."
-            : "Estás viendo los valores reales. Haz clic para encender la vista administrativa.";
+            ? "Vista administrativa: los importes llevan el ajuste aplicado. Haz clic para cambiar a la vista operativa."
+            : "Vista operativa: importes registrados. Haz clic para cambiar a la vista administrativa.";
     }
 
     async toggle() {

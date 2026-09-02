@@ -77,32 +77,33 @@ class TestCvaSecurity(CvaCase):
         self.assertEqual(self.order.x_cva_state, 'reset')
 
     # ------------------------------------------------------------------
-    # Chatter restringido
+    # Sin rastro en el chatter
     # ------------------------------------------------------------------
-    def test_05_chatter_visibility(self):
+    def test_05_chatter_no_trace(self):
+        """Aplicar o restablecer NO publica nada en el chatter de la orden:
+        ni con el subtipo CVA ni como nota, para nadie."""
+        Message = self.env['mail.message'].sudo()
+        base = [('model', '=', 'sale.order'), ('res_id', '=', self.order.id)]
+        count_before = Message.search_count(base)
+        self._apply(self.order, 20.0, reason='OTRO AJUSTE')
+        self._apply(self.order, 30.0, scope='lines',
+                    line_ids=self.order.order_line.ids, reason='')
+        self._reset(self.order, reason='')
+        self.assertEqual(Message.search_count(base), count_before)
         subtype = self.env.ref('sale_admin_value_control.mt_cva')
-        domain = [('model', '=', 'sale.order'),
-                  ('res_id', '=', self.order.id),
-                  ('subtype_id', '=', subtype.id)]
-        # el mensaje existe (creado por _cva_apply)
-        self.assertTrue(self.env['mail.message'].sudo().search_count(domain))
-        # el vendedor y el admin general no lo ven; consulta y manager sí
-        self.assertFalse(self.env['mail.message']
-                         .with_user(self.user_salesman).search_count(domain))
-        self.assertFalse(self.env['mail.message']
-                         .with_user(self.user_sysadmin).search_count(domain))
-        self.assertTrue(self.env['mail.message']
-                        .with_user(self.user_consulta).search_count(domain))
-        self.assertTrue(self.env['mail.message']
-                        .with_user(self.user_manager).search_count(domain))
-        # los mensajes normales del sistema siguen visibles para el vendedor
+        self.assertFalse(Message.search_count(
+            base + [('subtype_id', '=', subtype.id)]))
+        # la purga elimina lo que versiones anteriores hubieran publicado
+        legacy = self.order.sudo().message_post(
+            body='LEGADO', subtype_xmlid='sale_admin_value_control.mt_cva',
+            message_type='comment')
+        self.env['sale.order']._cva_purge_chatter()
+        self.assertFalse(legacy.exists())
+        # los mensajes normales siguen intactos y visibles para el vendedor
         self.order.with_user(self.user_salesman).message_post(
             body='NOTA NORMAL', message_type='comment')
-        normal = [('model', '=', 'sale.order'),
-                  ('res_id', '=', self.order.id),
-                  ('subtype_id', '!=', subtype.id)]
         self.assertTrue(self.env['mail.message']
-                        .with_user(self.user_salesman).search_count(normal))
+                        .with_user(self.user_salesman).search_count(base))
 
     def test_06_multicompany_rules(self):
         """El historial y los porcentajes rápidos respetan la compañía."""

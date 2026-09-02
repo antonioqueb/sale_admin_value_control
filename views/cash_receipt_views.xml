@@ -11,7 +11,7 @@
                      invisible="not x_cva_lens_on">
                     <strong>VISTA ADMINISTRATIVA:</strong> el monto del recibo se
                     muestra (y se imprime) con el ajuste administrativo de sus
-                    pedidos. El recibo conserva su importe real.
+                    pedidos. El recibo conserva su importe operativo.
                 </div>
                 <field name="x_cva_lens_on" invisible="1"/>
             </xpath>

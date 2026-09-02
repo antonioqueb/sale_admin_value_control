@@ -36,7 +36,9 @@
                 administrativo aplicado (lente administrativa).</field>
         </record>
 
-        <!-- Subtipo de chatter exclusivo: interno, sin suscripción por defecto. -->
+        <!-- Subtipo de chatter: YA NO se publica nada con él. Se conserva sólo
+             para localizar y purgar los mensajes que versiones anteriores
+             publicaron (sale.order._cva_purge_chatter, en cada -u). -->
         <record id="mt_cva" model="mail.message.subtype">
             <field name="name">Control administrativo</field>
             <field name="res_model">sale.order</field>

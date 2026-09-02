@@ -40,8 +40,8 @@ El % particular de una línea prevalece sobre el general de la orden.
 
 ## La lente administrativa
 
-Interruptor en la barra superior (píldora **VISTA ADMINISTRATIVA / VISTA
-REAL**), sólo visible para el Administrador. Encendida (estado por defecto):
+Interruptor en la barra superior (píldora **VISTA OPERATIVA / VISTA
+ADMINISTRATIVA**), sólo visible para el Administrador. Encendida (estado por defecto):
 
 * Órdenes, líneas, facturas de cliente, pagos y recibos de efectivo se
   presentan con el ajuste aplicado — formularios, listas, totales de grupo,
@@ -72,17 +72,19 @@ Cualquier flujo puede forzar valores reales con `context['cva_real']=True`.
 1. **Aplicar**: botón *Aplicar ajuste administrativo* en la orden →
    porcentaje (o botón rápido 10/20/30/40/50, configurables en
    *Configuración → Porcentajes rápidos*), alcance (toda la orden / líneas
-   seleccionadas), motivo obligatorio y vista previa por línea.
+   seleccionadas), motivo opcional y vista previa por línea.
    Aplicar el general limpia los % particulares salvo que se marque
    *Conservar porcentajes particulares*.
 2. **Restablecer**: botón *Restablecer valor administrativo* → confirma,
-   pide motivo, deja el % en 0 y conserva el historial.
+   motivo opcional, deja el % en 0 y conserva el historial.
 3. **Consultar**: pestaña *Control administrativo* de la orden (comparativa
    registrado vs administrativo, pagos, detalle por línea), menú raíz
    *Control de Valor Administrativo* (ventas con control, análisis, historial).
 4. **Trazabilidad**: cada aplicación/restablecimiento crea una entrada
-   inmutable en el historial (antes/después por orden y por línea) y un
-   mensaje de chatter con subtipo restringido que sólo ven los grupos CVA.
+   inmutable en el historial (antes/después por orden y por línea), visible
+   sólo para los grupos CVA. **No se publica nada en el chatter** de la
+   orden: el ajuste no deja rastro en la interfaz para nadie. Los mensajes
+   que versiones anteriores publicaron se purgan en cada actualización.
 
 ## Aislamiento (garantías)
 

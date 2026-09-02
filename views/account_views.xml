@@ -22,7 +22,7 @@
                     <strong>VISTA ADMINISTRATIVA:</strong> los importes de esta
                     factura se muestran con el ajuste administrativo. La
                     contabilidad, el PDF legal y lo que ve el cliente siguen
-                    siendo los valores reales.
+                    siendo los valores operativos.
                 </div>
                 <field name="x_cva_lens_on" invisible="1"/>
             </xpath>
@@ -40,7 +40,7 @@
                      invisible="not x_cva_lens_on">
                     <strong>VISTA ADMINISTRATIVA:</strong> el importe mostrado
                     lleva el ajuste administrativo de las facturas conciliadas.
-                    El pago registrado conserva su importe real.
+                    El pago registrado conserva su importe operativo.
                 </div>
                 <field name="x_cva_lens_on" invisible="1"/>
             </xpath>

@@ -7,4 +7,11 @@
         <record id="cva_quick_40" model="sale.cva.quick.percent"><field name="name">40%</field><field name="percent">40</field><field name="sequence">40</field></record>
         <record id="cva_quick_50" model="sale.cva.quick.percent"><field name="name">50%</field><field name="percent">50</field><field name="sequence">50</field></record>
     </data>
+
+    <data>
+        <!-- Los ajustes administrativos no dejan rastro en el chatter: en cada
+             actualización se purgan los mensajes que versiones anteriores
+             publicaron con el subtipo mt_cva. -->
+        <function model="sale.order" name="_cva_purge_chatter"/>
+    </data>
 </odoo>

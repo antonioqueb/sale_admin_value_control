@@ -25,8 +25,9 @@
                      groups="sale_admin_value_control.group_cva_manager"
                      invisible="not x_cva_lens_on">
                     <strong>VISTA ADMINISTRATIVA:</strong> los importes de esta
-                    pantalla llevan el ajuste administrativo aplicado. Apágala
-                    desde la barra superior para ver y editar los valores reales.
+                    pantalla llevan el ajuste administrativo aplicado. Cambia a la
+                    vista operativa desde la barra superior para ver y editar los
+                    valores registrados.
                 </div>
             </xpath>
 

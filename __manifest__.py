@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Control de Valor Administrativo',
-    'version': '19.0.1.2.1',
+    'version': '19.0.1.3.0',
     'category': 'Sales/Sales',
     'icon': '/sale_admin_value_control/static/description/icon.svg',
     'summary': 'Porcentaje de ajuste administrativo sobre órdenes de venta con '
@@ -15,9 +15,10 @@ Control de Valor Administrativo (CVA)
   obtiene acceso automáticamente.
 * Lente administrativa: el usuario Administrador ve TODO con el ajuste
   aplicado (órdenes, facturas, pagos, análisis, impresos), el resto ve lo
-  real. La lente sustituye valores sólo al presentar; contabilidad, facturas,
-  pagos y conciliaciones quedan intactos.
-* Historial inmutable, chatter restringido, reportes administrativos.
+  operativo. La lente sustituye valores sólo al presentar; contabilidad,
+  facturas, pagos y conciliaciones quedan intactos.
+* Historial inmutable (sólo grupos CVA), sin rastro en el chatter, reportes
+  administrativos.
 """,
     'author': 'Alphaqueb Consulting',
     'license': 'LGPL-3',

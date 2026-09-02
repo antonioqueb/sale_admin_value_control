@@ -46,11 +46,16 @@ class TestCvaHistory(CvaCase):
         with self.assertRaises(UserError):
             entry.line_ids.sudo().unlink()
 
-    def test_03_reset_requires_reason_and_keeps_history(self):
+    def test_03_reason_optional_and_keeps_history(self):
         order = self._make_order(price=100.0)
-        self._apply(order, 40.0)
-        with self.assertRaises(UserError):
-            order.with_user(self.user_manager)._cva_reset('')
+        # el motivo es opcional: vacío o None no bloquean ni el ajuste ni el
+        # restablecimiento, y el historial se sigue escribiendo
+        self._apply(order, 40.0, reason='')
+        self.assertEqual(order.x_cva_reason, '')
+        order.with_user(self.user_manager)._cva_reset('')
+        self.assertEqual(order.x_cva_state, 'reset')
+        self._apply(order, 40.0, reason=None)
+        self.assertEqual(len(order.sudo().x_cva_history_ids), 3)
         count_before = len(order.sudo().x_cva_history_ids)
         self._reset(order, reason='MOTIVO VALIDO')
         self.assertEqual(order.x_cva_state, 'reset')
