@@ -4,68 +4,147 @@
         <field name="name">sale.cva.apply.wizard.form</field>
         <field name="model">sale.cva.apply.wizard</field>
         <field name="arch" type="xml">
-            <form string="Aplicar ajuste administrativo">
+            <form string="Aplicar ajuste administrativo" class="o_cva_wiz">
                 <sheet>
-                    <group>
-                        <group>
-                            <field name="order_id" readonly="1"/>
-                            <field name="company_id" invisible="1"/>
-                            <field name="currency_id" invisible="1"/>
-                            <field name="scope" widget="radio"/>
-                            <field name="keep_line_overrides"
-                                   invisible="scope != 'order'"/>
-                        </group>
-                        <group>
-                            <field name="quick_id" widget="radio"
-                                   options="{'horizontal': true}"/>
-                            <field name="percent"/>
-                            <div colspan="2" class="text-muted small"
-                                 invisible="scope != 'lines'">
-                                El porcentaje general llena las líneas
-                                seleccionadas; luego ajusta cada línea con su
-                                rápido o escribiendo su % nuevo.
+                    <field name="company_id" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="below_cost" invisible="1"/>
+
+                    <!-- Encabezado -->
+                    <div class="o_cva_wiz_header">
+                        <div class="o_cva_wiz_header_icon">
+                            <i class="fa fa-percent" aria-hidden="true"/>
+                        </div>
+                        <div>
+                            <h2>Ajuste administrativo · <field name="order_id" readonly="1" options="{'no_open': True}"/></h2>
+                            <p>
+                                Indica cuánto se descuenta del valor administrativo de la orden.
+                                La orden, la factura y la contabilidad no cambian.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Paso 1 -->
+                    <div class="o_cva_wiz_step">
+                        <div class="o_cva_wiz_step_title">
+                            <span class="o_cva_wiz_step_num">1</span>
+                            ¿Cómo quieres aplicarlo?
+                        </div>
+                        <field name="scope" widget="radio" nolabel="1"
+                               class="o_cva_wiz_scope"/>
+                        <div class="o_cva_wiz_hint" invisible="scope != 'order'">
+                            Todos los productos de la orden quedan con el mismo porcentaje.
+                        </div>
+                        <div class="o_cva_wiz_hint" invisible="scope != 'lines'">
+                            Cada producto puede llevar un porcentaje distinto (por ejemplo, 20% en uno y 10% en otro).
+                            Apaga los productos que no quieras ajustar.
+                        </div>
+                        <div class="o_cva_wiz_check" invisible="scope != 'order'">
+                            <field name="keep_line_overrides" nolabel="1"/>
+                            <label for="keep_line_overrides"/>
+                        </div>
+                    </div>
+
+                    <!-- Paso 2 -->
+                    <div class="o_cva_wiz_step">
+                        <div class="o_cva_wiz_step_title">
+                            <span class="o_cva_wiz_step_num">2</span>
+                            <span invisible="scope != 'order'">¿Qué porcentaje se descuenta?</span>
+                            <span invisible="scope != 'lines'">Porcentaje para todos los productos marcados</span>
+                        </div>
+                        <div class="o_cva_wiz_pct_row">
+                            <div class="o_cva_wiz_pct_quick">
+                                <span class="o_cva_wiz_mini">Elige una opción</span>
+                                <field name="quick_id" widget="radio" nolabel="1"
+                                       options="{'horizontal': true}" class="o_cva_wiz_chips"/>
                             </div>
-                            <field name="reason" placeholder="Motivo o referencia interna (opcional)"/>
-                        </group>
-                    </group>
-                    <notebook>
-                        <page string="Vista previa por línea" name="preview">
-                            <field name="line_ids" readonly="scope != 'lines'">
-                                <list create="false" delete="false" editable="bottom">
-                                    <field name="selected" widget="boolean_toggle"
-                                           column_invisible="parent.scope != 'lines'"/>
-                                    <field name="product_id" readonly="1"/>
-                                    <field name="name" readonly="1" optional="hide"/>
-                                    <field name="qty" readonly="1"/>
-                                    <field name="price_unit_ref" readonly="1"/>
-                                    <field name="percent_current" readonly="1"/>
-                                    <field name="has_override" readonly="1" optional="hide"/>
-                                    <field name="subtotal_adm_current" readonly="1"/>
-                                    <field name="company_id" column_invisible="1"/>
-                                    <field name="quick_id" widget="selection"
-                                           column_invisible="parent.scope != 'lines'"
-                                           readonly="not selected"/>
-                                    <field name="percent_new" decoration-info="1"
-                                           readonly="parent.scope != 'lines' or not selected"/>
-                                    <field name="subtotal_adm_new" readonly="1" decoration-info="1"/>
-                                    <field name="cost_all_in" readonly="1" sum="Costo all-in"/>
-                                    <field name="currency_id" column_invisible="1"/>
-                                    <field name="line_id" column_invisible="1"/>
-                                </list>
-                            </field>
-                        </page>
-                    </notebook>
-                    <group class="oe_subtotal_footer">
-                        <field name="total_ref"/>
-                        <field name="total_adm_current"/>
-                        <field name="total_adm_new" class="oe_subtotal_footer_separator"/>
-                        <field name="diff_new"/>
-                        <field name="total_cost_all_in" class="oe_subtotal_footer_separator"/>
-                    </group>
+                            <div class="o_cva_wiz_pct_or">o</div>
+                            <div class="o_cva_wiz_pct_manual">
+                                <span class="o_cva_wiz_mini">Escríbelo</span>
+                                <div class="o_cva_wiz_pct_input">
+                                    <field name="percent" nolabel="1"/>
+                                    <span>%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="o_cva_wiz_hint" invisible="scope != 'lines'">
+                            Después puedes cambiar el porcentaje de cada producto en la tabla de abajo:
+                            con su opción rápida o escribiéndolo en «Ajuste a aplicar (%)».
+                        </div>
+                    </div>
+
+                    <!-- Paso 3 -->
+                    <div class="o_cva_wiz_step">
+                        <div class="o_cva_wiz_step_title">
+                            <span class="o_cva_wiz_step_num">3</span>
+                            Revisa cómo quedan los productos
+                        </div>
+                        <field name="line_ids" nolabel="1" class="o_cva_wiz_lines"
+                               readonly="scope != 'lines'">
+                            <list create="false" delete="false" editable="bottom">
+                                <field name="selected" widget="boolean_toggle"
+                                       column_invisible="parent.scope != 'lines'"/>
+                                <field name="product_id" readonly="1"/>
+                                <field name="name" readonly="1" optional="hide"/>
+                                <field name="qty" readonly="1"/>
+                                <field name="uom_id" readonly="1" optional="show"/>
+                                <field name="price_unit_ref" readonly="1" optional="hide"/>
+                                <field name="percent_current" readonly="1"/>
+                                <field name="has_override" readonly="1" optional="hide"/>
+                                <field name="subtotal_adm_current" readonly="1"/>
+                                <field name="company_id" column_invisible="1"/>
+                                <field name="quick_id" widget="selection"
+                                       column_invisible="parent.scope != 'lines'"
+                                       readonly="not selected"/>
+                                <field name="percent_new" class="o_cva_wiz_col_new"
+                                       readonly="parent.scope != 'lines' or not selected"/>
+                                <field name="subtotal_adm_new" readonly="1" class="o_cva_wiz_col_new"/>
+                                <field name="cost_all_in" readonly="1" optional="show"/>
+                                <field name="currency_id" column_invisible="1"/>
+                                <field name="line_id" column_invisible="1"/>
+                            </list>
+                        </field>
+                    </div>
+
+                    <!-- Resumen -->
+                    <div class="o_cva_wiz_summary">
+                        <div class="o_cva_wiz_card">
+                            <span class="o_cva_wiz_card_label">Total de la orden</span>
+                            <field name="total_ref" class="o_cva_wiz_card_value"/>
+                            <span class="o_cva_wiz_card_note">No cambia</span>
+                        </div>
+                        <div class="o_cva_wiz_card">
+                            <span class="o_cva_wiz_card_label">Total administrativo hoy</span>
+                            <field name="total_adm_current" class="o_cva_wiz_card_value"/>
+                            <span class="o_cva_wiz_card_note">Antes de este ajuste</span>
+                        </div>
+                        <div class="o_cva_wiz_card o_cva_wiz_card_accent">
+                            <span class="o_cva_wiz_card_label">Total administrativo con este ajuste</span>
+                            <field name="total_adm_new" class="o_cva_wiz_card_value"/>
+                            <span class="o_cva_wiz_card_note">Se descuentan <field name="diff_new" class="o_cva_wiz_inline"/></span>
+                        </div>
+                        <div class="o_cva_wiz_card">
+                            <span class="o_cva_wiz_card_label">Costo all-in (sin IVA)</span>
+                            <field name="total_cost_all_in" class="o_cva_wiz_card_value"/>
+                            <span class="o_cva_wiz_card_note">Subtotal con ajuste: <field name="subtotal_adm_new" class="o_cva_wiz_inline"/></span>
+                        </div>
+                    </div>
+                    <div class="o_cva_wiz_alert" invisible="not below_cost" role="alert">
+                        <i class="fa fa-exclamation-triangle" aria-hidden="true"/>
+                        Con este ajuste la orden queda <b>por debajo de su costo all-in</b>.
+                        Revisa el porcentaje antes de aplicarlo.
+                    </div>
+
+                    <!-- Motivo -->
+                    <div class="o_cva_wiz_reason">
+                        <label for="reason" string="Motivo (opcional)"/>
+                        <field name="reason" nolabel="1"
+                               placeholder="Ej. negociación con el cliente, referencia interna…"/>
+                    </div>
                 </sheet>
                 <footer>
-                    <button string="Confirmar aplicación" name="action_confirm"
-                            type="object" class="btn-primary"/>
+                    <button string="Aplicar ajuste" name="action_confirm"
+                            type="object" class="btn-primary" icon="fa-check"/>
                     <button string="Cancelar" special="cancel" class="btn-secondary"/>
                 </footer>
             </form>

@@ -1,0 +1,412 @@
+// ═══ Wizard "Aplicar ajuste administrativo" ═══
+// Branding SOM: azul de la casa, fondos neutros, tarjetas blancas.
+// Sin min()/max() de unidades mixtas (tumban web.assets_web).
+
+$cva-blue: #0b57d0;
+$cva-blue-dark: #083b8f;
+$cva-blue-soft: #e8f0fe;
+$cva-ink: #1f2937;
+$cva-muted: #6b7280;
+$cva-line: #e5e7eb;
+$cva-bg: #f6f8fc;
+$cva-ok: #0b8a5c;
+$cva-danger: #c62828;
+
+// --- Tamaño del modal ------------------------------------------------------
+@include media-breakpoint-up(md) {
+    .o_dialog .modal-dialog:has(.o_cva_wiz) {
+        max-width: 1180px !important;
+        width: 94vw !important;
+
+        .modal-content {
+            border: none;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.22);
+        }
+    }
+}
+.o_dialog .modal-dialog:has(.o_cva_wiz) {
+    .modal-header {
+        display: none;
+    }
+    .modal-footer {
+        background: #ffffff;
+        border-top: 1px solid $cva-line;
+        padding: 12px 24px;
+
+        .btn {
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background: $cva-blue;
+            border-color: $cva-blue;
+            &:hover { background: $cva-blue-dark; border-color: $cva-blue-dark; }
+        }
+    }
+}
+
+// --- Formulario ------------------------------------------------------------
+.o_cva_wiz {
+    color: $cva-ink;
+
+    .o_form_sheet_bg,
+    .o_form_sheet {
+        max-width: 100% !important;
+        width: 100% !important;
+        background: $cva-bg;
+        border: none;
+        box-shadow: none;
+        margin: 0 !important;
+    }
+    .o_form_sheet {
+        padding: 0 24px 20px !important;
+    }
+
+    // ----- Encabezado -----
+    .o_cva_wiz_header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin: 0 -24px 20px;
+        padding: 20px 24px;
+        background: linear-gradient(135deg, $cva-blue-dark 0%, $cva-blue 100%);
+        color: #ffffff;
+
+        h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            flex-wrap: wrap;
+
+            .o_field_widget,
+            .o_field_widget a,
+            .o_field_widget span {
+                color: #ffffff !important;
+                font-weight: 700;
+            }
+        }
+        p {
+            margin: 4px 0 0;
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.85);
+        }
+    }
+    .o_cva_wiz_header_icon {
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.16);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    // ----- Pasos -----
+    .o_cva_wiz_step {
+        background: #ffffff;
+        border: 1px solid $cva-line;
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 14px;
+        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    }
+    .o_cva_wiz_step_title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: $cva-blue-dark;
+        margin-bottom: 12px;
+    }
+    .o_cva_wiz_step_num {
+        flex: 0 0 26px;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: $cva-blue;
+        color: #ffffff;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .o_cva_wiz_hint {
+        margin-top: 10px;
+        font-size: 0.85rem;
+        color: $cva-muted;
+    }
+    .o_cva_wiz_mini {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: $cva-muted;
+        margin-bottom: 6px;
+    }
+    .o_cva_wiz_check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        .o_form_label { font-weight: 500; color: $cva-ink; margin: 0; }
+    }
+
+    // ----- Opciones tipo tarjeta / chip (radios) -----
+    // Radio de Odoo: .o_radio_item > input.o_radio_input + label.
+    .o_cva_wiz_scope,
+    .o_cva_wiz_chips {
+        width: 100%;
+
+        > div,
+        .o_horizontal,
+        .o_vertical {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .o_radio_item {
+            position: relative;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .o_radio_input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .o_radio_item label,
+        .o_radio_item .o_form_label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            cursor: pointer;
+            border: 1.5px solid $cva-line;
+            background: #ffffff;
+            color: $cva-ink;
+            font-weight: 600;
+            transition: border-color 0.15s, background 0.15s, color 0.15s;
+            &:hover { border-color: $cva-blue; }
+        }
+        .o_radio_input:checked + label,
+        .o_radio_input:checked + .o_form_label {
+            border-color: $cva-blue;
+            background: $cva-blue-soft;
+            color: $cva-blue-dark;
+        }
+        .o_radio_input:focus-visible + label {
+            outline: 2px solid $cva-blue;
+            outline-offset: 2px;
+        }
+    }
+    .o_cva_wiz_scope .o_radio_item label,
+    .o_cva_wiz_scope .o_radio_item .o_form_label {
+        padding: 10px 16px;
+        border-radius: 10px;
+        &::before {
+            content: "";
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #9ca3af;
+            background: #ffffff;
+            flex: 0 0 16px;
+        }
+    }
+    .o_cva_wiz_scope .o_radio_input:checked + label::before,
+    .o_cva_wiz_scope .o_radio_input:checked + .o_form_label::before {
+        border-color: $cva-blue;
+        box-shadow: inset 0 0 0 3px #ffffff;
+        background: $cva-blue;
+    }
+    .o_cva_wiz_chips .o_radio_item label,
+    .o_cva_wiz_chips .o_radio_item .o_form_label {
+        padding: 6px 16px;
+        border-radius: 999px;
+    }
+
+    // ----- Porcentaje: rápidas "o" escrito -----
+    .o_cva_wiz_pct_row {
+        display: flex;
+        align-items: flex-end;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .o_cva_wiz_pct_quick { flex: 1 1 320px; }
+    .o_cva_wiz_pct_or {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: $cva-muted;
+        text-transform: uppercase;
+        padding-bottom: 10px;
+    }
+    .o_cva_wiz_pct_manual { flex: 0 0 auto; }
+    .o_cva_wiz_pct_input {
+        display: inline-flex;
+        align-items: center;
+        border: 1.5px solid $cva-line;
+        border-radius: 10px;
+        background: #ffffff;
+        padding: 2px 12px 2px 4px;
+        &:focus-within { border-color: $cva-blue; box-shadow: 0 0 0 3px $cva-blue-soft; }
+
+        .o_field_widget { width: 90px; }
+        input {
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: right;
+            color: $cva-blue-dark;
+            padding: 4px 6px;
+        }
+        > span {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: $cva-muted;
+        }
+    }
+
+    // ----- Tabla de productos -----
+    .o_cva_wiz_lines {
+        width: 100%;
+
+        .o_list_renderer {
+            border: 1px solid $cva-line;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .o_list_table {
+            margin-bottom: 0;
+            thead th {
+                background: #f9fafb;
+                color: $cva-muted;
+                font-size: 0.74rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+                border-bottom: 1px solid $cva-line;
+                white-space: normal;
+                vertical-align: bottom;
+            }
+            tbody td { vertical-align: middle; }
+            // Columnas del resultado: resaltadas en azul
+            th.o_cva_wiz_col_new,
+            td.o_cva_wiz_col_new {
+                background: $cva-blue-soft;
+                color: $cva-blue-dark;
+                font-weight: 700;
+            }
+            thead th.o_cva_wiz_col_new { color: $cva-blue-dark; }
+            td.o_cva_wiz_col_new input {
+                font-weight: 700;
+                color: $cva-blue-dark;
+                background: #ffffff;
+                border: 1px solid #c7d7f7;
+                border-radius: 6px;
+                padding: 2px 6px;
+                text-align: right;
+            }
+        }
+    }
+
+    // ----- Resumen -----
+    .o_cva_wiz_summary {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 14px;
+
+        @include media-breakpoint-down(lg) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        @include media-breakpoint-down(sm) {
+            grid-template-columns: 1fr;
+        }
+    }
+    .o_cva_wiz_card {
+        background: #ffffff;
+        border: 1px solid $cva-line;
+        border-radius: 12px;
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+
+        &_label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: $cva-muted;
+        }
+        &_value,
+        &_value span {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: $cva-ink;
+        }
+        &_note {
+            font-size: 0.8rem;
+            color: $cva-muted;
+        }
+        &_accent {
+            background: linear-gradient(135deg, $cva-blue-soft 0%, #dbe7fd 100%);
+            border-color: #b6ccf5;
+            .o_cva_wiz_card_label { color: $cva-blue-dark; }
+            .o_cva_wiz_card_value,
+            .o_cva_wiz_card_value span { color: $cva-blue-dark; }
+        }
+    }
+    .o_cva_wiz_inline,
+    .o_cva_wiz_inline span {
+        display: inline !important;
+        font-weight: 700;
+        color: $cva-ink;
+    }
+    .o_cva_wiz_alert {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: #fdecea;
+        border: 1px solid #f5c2c0;
+        color: $cva-danger;
+        font-size: 0.9rem;
+        i { font-size: 1.1rem; }
+    }
+
+    // ----- Motivo -----
+    .o_cva_wiz_reason {
+        background: #ffffff;
+        border: 1px solid $cva-line;
+        border-radius: 12px;
+        padding: 12px 16px;
+
+        .o_form_label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: $cva-muted;
+            margin-bottom: 6px;
+        }
+        .o_field_widget { width: 100%; }
+    }
+}

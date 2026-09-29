@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Control de Valor Administrativo',
-    'version': '19.0.1.7.0',
+    'version': '19.0.1.8.0',
     'category': 'Sales/Sales',
     'icon': '/sale_admin_value_control/static/description/icon.svg',
     'summary': 'Porcentaje de ajuste administrativo sobre órdenes de venta con '
@@ -51,6 +51,7 @@ Control de Valor Administrativo (CVA)
             'sale_admin_value_control/static/src/cash_state/cva_cash_state.js',
             'sale_admin_value_control/static/src/cash_state/cva_cash_state.xml',
             'sale_admin_value_control/static/src/cash_state/cva_cash_state.scss',
+            'sale_admin_value_control/static/src/apply_wizard/cva_apply_wizard.scss',
         ],
     },
     'installable': True,
