@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo.exceptions import UserError, ValidationError
+from odoo.tests import Form
 
 from .common import CvaCase
 
@@ -123,3 +124,26 @@ class TestCvaCompute(CvaCase):
         wiz.action_confirm()
         self.assertAlmostEqual(order.x_cva_amount_total, 120.0)
         self.assertEqual(order.x_cva_reason, 'VIA WIZARD')
+
+    def test_10_wizard_live_preview_lines(self):
+        """Vista previa en vivo: en 'Sólo líneas seleccionadas', cambiar el %
+        o apagar una línea recalcula % nuevo y subtotal sin confirmar."""
+        order = self._make_order(price=100.0, n_lines=2)
+        before = order.x_cva_percent
+        with Form(self.env['sale.cva.apply.wizard'].with_user(self.user_manager)
+                  .with_context(default_order_id=order.id)) as f:
+            f.scope = 'lines'
+            f.percent = 10.0
+            with f.line_ids.edit(1) as wl:
+                wl.selected = False
+            with f.line_ids.edit(0) as wl:
+                self.assertAlmostEqual(wl.percent_new, 10.0)
+                self.assertAlmostEqual(wl.subtotal_adm_new, 90.0)
+            with f.line_ids.edit(1) as wl:
+                self.assertAlmostEqual(wl.percent_new, before)
+                self.assertAlmostEqual(wl.subtotal_adm_new, 100.0 * (1 - before / 100.0))
+            f.percent = 20.0
+            with f.line_ids.edit(0) as wl:
+                self.assertAlmostEqual(wl.subtotal_adm_new, 80.0)
+        # Sin confirmar, la orden no cambia.
+        self.assertAlmostEqual(order.x_cva_percent, before)
