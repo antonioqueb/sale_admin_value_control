@@ -13,7 +13,7 @@ class SaleCvaApplyWizard(models.TransientModel):
     company_id = fields.Many2one(related='order_id.company_id')
     scope = fields.Selection([
         ('order', 'Toda la orden'),
-        ('lines', 'Sólo líneas seleccionadas'),
+        ('lines', 'Por línea (un % en cada una)'),
     ], string='Alcance', required=True, default='order')
     percent = fields.Float(string='Porcentaje', digits=(5, 2), required=True)
     quick_id = fields.Many2one(
@@ -90,14 +90,21 @@ class SaleCvaApplyWizard(models.TransientModel):
     # VISTA PREVIA EN VIVO: la escribe el onchange del wizard sobre cada
     # línea. Como compute de la línea dependiente del padre (wizard_id.*)
     # el formulario no la refrescaba al elegir el porcentaje rápido ni al
-    # prender/apagar líneas en "Sólo líneas seleccionadas".
-    @api.onchange('percent', 'scope', 'keep_line_overrides', 'line_ids')
+    # prender/apagar líneas.
+    # "Por línea": el % general (rápido o escrito) llena las líneas
+    # seleccionadas; después cada línea se edita sola (su propio rápido o
+    # escrito a mano) y NO se pisa al tocar otras líneas: por eso aquí no
+    # se escucha line_ids.
+    @api.onchange('percent', 'scope', 'keep_line_overrides')
     def _onchange_cva_preview(self):
         for wiz in self:
             for wline in wiz.line_ids:
                 if wline.line_id:
+                    wline.quick_id = False
                     wline.update(wiz._cva_preview_vals(
-                        wline.line_id, wiz._line_new_percent(wline)))
+                        wline.line_id, wiz._cva_preview_percent(
+                            wline.line_id, wline.selected, wiz.percent,
+                            wiz.scope, wiz.keep_line_overrides)))
 
     @api.onchange('quick_id')
     def _onchange_quick_id(self):
@@ -107,12 +114,17 @@ class SaleCvaApplyWizard(models.TransientModel):
 
     def _line_new_percent(self, wline):
         self.ensure_one()
+        if self.scope == 'lines':
+            if wline.selected:
+                return wline.percent_new or 0.0
+            return wline.line_id.x_cva_percent or 0.0
         return self._cva_preview_percent(
             wline.line_id, wline.selected, self.percent, self.scope,
             self.keep_line_overrides)
 
     @api.depends('percent', 'scope', 'keep_line_overrides',
-                 'line_ids.selected', 'line_ids.cost_all_in', 'order_id')
+                 'line_ids.selected', 'line_ids.percent_new',
+                 'line_ids.cost_all_in', 'order_id')
     def _compute_preview(self):
         for wiz in self:
             order = wiz.order_id
@@ -134,11 +146,13 @@ class SaleCvaApplyWizard(models.TransientModel):
         self.ensure_one()
         order = self.order_id
         if self.scope == 'lines':
-            selected = self.line_ids.filtered('selected').mapped('line_id')
+            selected = self.line_ids.filtered(lambda w: w.selected and w.line_id)
             if not selected:
                 raise UserError(_('Selecciona al menos una línea.'))
-            order._cva_apply(self.percent, scope='lines',
-                             line_ids=selected.ids, reason=self.reason)
+            order._cva_apply(
+                self.percent, scope='lines', reason=self.reason,
+                line_percents={w.line_id.id: w.percent_new or 0.0
+                               for w in selected})
         else:
             order._cva_apply(self.percent, scope='order', reason=self.reason,
                              keep_line_overrides=self.keep_line_overrides)
@@ -152,6 +166,7 @@ class SaleCvaApplyWizardLine(models.TransientModel):
     wizard_id = fields.Many2one(
         'sale.cva.apply.wizard', required=True, ondelete='cascade')
     currency_id = fields.Many2one(related='wizard_id.currency_id')
+    company_id = fields.Many2one(related='wizard_id.company_id')
     selected = fields.Boolean(string='Aplicar', default=True)
     line_id = fields.Many2one(
         'sale.order.line', string='Línea', required=True, ondelete='cascade')
@@ -167,7 +182,11 @@ class SaleCvaApplyWizardLine(models.TransientModel):
     subtotal_adm_current = fields.Monetary(
         related='line_id.x_cva_price_subtotal', string='Subtotal adm. actual')
     # Los llena el onchange del wizard (_onchange_cva_preview): vista
-    # previa en vivo; nunca se usan para aplicar (action_confirm recalcula).
+    # previa en vivo. En "Por línea" percent_new es editable (rápido de la
+    # línea o escrito a mano) y ES el % que se aplica a esa línea.
+    quick_id = fields.Many2one(
+        'sale.cva.quick.percent', string='Rápido',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     percent_new = fields.Float(string='% nuevo', digits=(5, 2))
     subtotal_adm_new = fields.Monetary(string='Subtotal adm. nuevo')
     cost_all_in = fields.Monetary(
@@ -175,6 +194,45 @@ class SaleCvaApplyWizardLine(models.TransientModel):
         help='Costo ALL-IN del producto (base + logística + arancel) × '
              'cantidad, en la divisa de la orden y sin IVA. Mismo costo '
              'que usa el Margen All-In % de la orden.')
+
+    @api.constrains('percent_new')
+    def _check_percent_new(self):
+        for wline in self:
+            if wline.percent_new < 0 or wline.percent_new > 100:
+                raise ValidationError(_(
+                    'El porcentaje debe estar entre 0%% y 100%% '
+                    '(capturaste %.2f%%).') % wline.percent_new)
+
+    def _cva_refresh_subtotal(self):
+        for wline in self:
+            if wline.line_id:
+                wline.subtotal_adm_new = (wline.line_id.price_subtotal or 0.0) \
+                    * (1.0 - (wline.percent_new or 0.0) / 100.0)
+
+    @api.onchange('quick_id')
+    def _onchange_line_quick_id(self):
+        for wline in self:
+            if wline.quick_id:
+                wline.percent_new = wline.quick_id.percent
+        self._cva_refresh_subtotal()
+
+    @api.onchange('percent_new')
+    def _onchange_line_percent_new(self):
+        for wline in self:
+            if wline.quick_id and wline.quick_id.percent != wline.percent_new:
+                wline.quick_id = False
+        self._cva_refresh_subtotal()
+
+    @api.onchange('selected')
+    def _onchange_line_selected(self):
+        # Apagada = se queda como está; encendida = arranca con el general.
+        for wline in self:
+            wline.quick_id = False
+            if wline.selected:
+                wline.percent_new = wline.wizard_id.percent or 0.0
+            else:
+                wline.percent_new = wline.line_id.x_cva_percent or 0.0
+        self._cva_refresh_subtotal()
 
     @api.depends('line_id', 'line_id.product_id', 'line_id.product_uom_qty')
     def _compute_cost_all_in(self):

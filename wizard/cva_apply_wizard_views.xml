@@ -19,6 +19,12 @@
                             <field name="quick_id" widget="radio"
                                    options="{'horizontal': true}"/>
                             <field name="percent"/>
+                            <div colspan="2" class="text-muted small"
+                                 invisible="scope != 'lines'">
+                                El porcentaje general llena las líneas
+                                seleccionadas; luego ajusta cada línea con su
+                                rápido o escribiendo su % nuevo.
+                            </div>
                             <field name="reason" placeholder="Motivo o referencia interna (opcional)"/>
                         </group>
                     </group>
@@ -35,7 +41,12 @@
                                     <field name="percent_current" readonly="1"/>
                                     <field name="has_override" readonly="1" optional="hide"/>
                                     <field name="subtotal_adm_current" readonly="1"/>
-                                    <field name="percent_new" readonly="1" decoration-info="1"/>
+                                    <field name="company_id" column_invisible="1"/>
+                                    <field name="quick_id" widget="selection"
+                                           column_invisible="parent.scope != 'lines'"
+                                           readonly="not selected"/>
+                                    <field name="percent_new" decoration-info="1"
+                                           readonly="parent.scope != 'lines' or not selected"/>
                                     <field name="subtotal_adm_new" readonly="1" decoration-info="1"/>
                                     <field name="cost_all_in" readonly="1" sum="Costo all-in"/>
                                     <field name="currency_id" column_invisible="1"/>

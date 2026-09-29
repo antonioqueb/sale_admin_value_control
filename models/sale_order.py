@@ -326,7 +326,9 @@ class SaleOrder(models.Model):
         }
 
     def _cva_apply(self, percent, scope='order', line_ids=None, reason='',
-                   keep_line_overrides=False):
+                   keep_line_overrides=False, line_percents=None):
+        """line_percents: {line_id: %} para scope='lines' con un porcentaje
+        distinto por línea; si falta una línea usa ``percent``."""
         self.ensure_one()
         self._cva_check_manager()
         if self.state == 'cancel':
@@ -357,16 +359,27 @@ class SaleOrder(models.Model):
             lines.write({'x_cva_write_uid': user.id, 'x_cva_write_date': now})
             action, affected = 'apply_order', lines
         else:
-            affected = self.env['sale.order.line'].browse(line_ids or []) & lines
+            line_percents = line_percents or {}
+            affected = self.env['sale.order.line'].browse(
+                list(line_ids or []) + list(line_percents)) & lines
             if not affected:
                 raise UserError(_('Selecciona al menos una línea.'))
+            for line in affected:
+                pct = line_percents.get(line.id, percent)
+                if pct < 0 or pct > 100:
+                    raise UserError(_(
+                        'El porcentaje debe estar entre 0%% y 100%% '
+                        '(%(line)s: %(pct).2f%%).',
+                        line=line.product_id.display_name or line.name,
+                        pct=pct))
             self.write(header_vals)
-            affected.write({
-                'x_cva_has_override': True,
-                'x_cva_percent_override': percent,
-                'x_cva_write_uid': user.id,
-                'x_cva_write_date': now,
-            })
+            for line in affected:
+                line.write({
+                    'x_cva_has_override': True,
+                    'x_cva_percent_override': line_percents.get(line.id, percent),
+                    'x_cva_write_uid': user.id,
+                    'x_cva_write_date': now,
+                })
             action = 'apply_lines'
         after = self._cva_snapshot()
         self._cva_log_history(action, reason, before, after, affected)

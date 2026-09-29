@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Control de Valor Administrativo',
-    'version': '19.0.1.6.0',
+    'version': '19.0.1.7.0',
     'category': 'Sales/Sales',
     'icon': '/sale_admin_value_control/static/description/icon.svg',
     'summary': 'Porcentaje de ajuste administrativo sobre órdenes de venta con '
