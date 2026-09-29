@@ -90,6 +90,25 @@ class SaleOrderLine(models.Model):
             return self.x_cva_percent_override or 0.0
         return self.order_id.x_cva_percent or 0.0
 
+    def _cva_cost_all_in(self):
+        """Costo ALL-IN de la línea (x_costo_mayor × cantidad) en la divisa
+        de la orden, sin IVA. Mismo costo que el Margen All-In % de
+        inventory_shopping_cart; 0 si ese módulo no está o no hay costo."""
+        self.ensure_one()
+        product = self.product_id
+        if self.display_type or not product or product.type == 'service':
+            return 0.0
+        company = self.order_id.company_id or self.company_id or self.env.company
+        tmpl = product.product_tmpl_id.sudo().with_company(company)
+        if 'x_costo_mayor' not in tmpl._fields:
+            return 0.0
+        cost = float(tmpl.x_costo_mayor or 0.0) * (self.product_uom_qty or 0.0)
+        cur = self.currency_id or company.currency_id
+        if cost and cur and company.currency_id and cur != company.currency_id:
+            date = self.order_id.date_order or fields.Date.context_today(self)
+            cost = company.currency_id._convert(cost, cur, company, date)
+        return cost
+
     def _cva_taxed_amounts(self, factor):
         """(subtotal, total) administrativos en la moneda de la orden, con el
         mismo motor de impuestos que usa Odoo para los importes nativos."""

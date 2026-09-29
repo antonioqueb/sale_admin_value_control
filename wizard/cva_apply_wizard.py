@@ -36,6 +36,11 @@ class SaleCvaApplyWizard(models.TransientModel):
         string='Total administrativo nuevo', compute='_compute_preview')
     diff_new = fields.Monetary(
         string='Diferencia resultante', compute='_compute_preview')
+    total_cost_all_in = fields.Monetary(
+        string='Costo all-in total', compute='_compute_preview',
+        help='Suma del costo ALL-IN (base + logística + arancel) de las '
+             'líneas, en la divisa de la orden y sin IVA. Sirve de piso '
+             'para decidir cuánto ajustar.')
 
     @api.constrains('percent')
     def _check_percent(self):
@@ -76,7 +81,7 @@ class SaleCvaApplyWizard(models.TransientModel):
         return line.x_cva_percent or 0.0
 
     @api.depends('percent', 'scope', 'keep_line_overrides',
-                 'line_ids.selected', 'order_id')
+                 'line_ids.selected', 'line_ids.cost_all_in', 'order_id')
     def _compute_preview(self):
         for wiz in self:
             order = wiz.order_id
@@ -92,6 +97,7 @@ class SaleCvaApplyWizard(models.TransientModel):
             wiz.total_adm_current = order.x_cva_amount_total or 0.0
             wiz.total_adm_new = total_new
             wiz.diff_new = total_ref - total_new
+            wiz.total_cost_all_in = sum(wiz.line_ids.mapped('cost_all_in'))
 
     def action_confirm(self):
         self.ensure_one()
@@ -133,6 +139,17 @@ class SaleCvaApplyWizardLine(models.TransientModel):
         string='% nuevo', compute='_compute_preview_line', digits=(5, 2))
     subtotal_adm_new = fields.Monetary(
         string='Subtotal adm. nuevo', compute='_compute_preview_line')
+    cost_all_in = fields.Monetary(
+        string='Costo all-in', compute='_compute_cost_all_in',
+        help='Costo ALL-IN del producto (base + logística + arancel) × '
+             'cantidad, en la divisa de la orden y sin IVA. Mismo costo '
+             'que usa el Margen All-In % de la orden.')
+
+    @api.depends('line_id', 'line_id.product_id', 'line_id.product_uom_qty')
+    def _compute_cost_all_in(self):
+        for wline in self:
+            wline.cost_all_in = wline.line_id._cva_cost_all_in() \
+                if wline.line_id else 0.0
 
     @api.depends('selected', 'wizard_id.percent', 'wizard_id.scope',
                  'wizard_id.keep_line_overrides')

@@ -37,6 +37,7 @@
                                     <field name="subtotal_adm_current" readonly="1"/>
                                     <field name="percent_new" readonly="1" decoration-info="1"/>
                                     <field name="subtotal_adm_new" readonly="1" decoration-info="1"/>
+                                    <field name="cost_all_in" readonly="1" sum="Costo all-in"/>
                                     <field name="currency_id" column_invisible="1"/>
                                     <field name="line_id" column_invisible="1"/>
                                 </list>
@@ -48,6 +49,7 @@
                         <field name="total_adm_current"/>
                         <field name="total_adm_new" class="oe_subtotal_footer_separator"/>
                         <field name="diff_new"/>
+                        <field name="total_cost_all_in" class="oe_subtotal_footer_separator"/>
                     </group>
                 </sheet>
                 <footer>
