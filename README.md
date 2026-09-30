@@ -74,7 +74,11 @@ Cualquier flujo puede forzar valores reales con `context['cva_real']=True`.
    *Configuración → Porcentajes rápidos*), alcance (toda la orden / líneas
    seleccionadas), motivo opcional y vista previa por línea.
    Aplicar el general limpia los % particulares salvo que se marque
-   *Conservar porcentajes particulares*.
+   *Conservar porcentajes particulares* (viene marcado si la orden ya tiene
+   % por línea). Por línea se ve Utilidad hoy / Nueva utilidad (sobre costo
+   all-in) y se captura *Facturado* (solo referencia; la fila se pinta en
+   verde). Un solo botón *Guardar*: aplica el ajuste solo si cambió algún %
+   y siempre guarda el Facturado.
 2. **Restablecer**: botón *Restablecer valor administrativo* → confirma,
    motivo opcional, deja el % en 0 y conserva el historial.
 3. **Consultar**: pestaña *Control administrativo* de la orden (comparativa

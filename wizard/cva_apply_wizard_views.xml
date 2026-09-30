@@ -165,10 +165,8 @@
                     </div>
                 </sheet>
                 <footer>
-                    <button string="Aplicar ajuste" name="action_confirm"
+                    <button string="Guardar" name="action_confirm"
                             type="object" class="btn-primary" icon="fa-check"/>
-                    <button string="Guardar facturado" name="action_save_invoiced"
-                            type="object" class="btn-secondary" icon="fa-file-text-o"/>
                     <button string="Cancelar" special="cancel" class="btn-secondary"/>
                 </footer>
             </form>

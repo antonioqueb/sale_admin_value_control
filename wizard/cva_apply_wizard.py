@@ -72,9 +72,16 @@ class SaleCvaApplyWizard(models.TransientModel):
             order = self.env['sale.order'].browse(order_id)
             res.setdefault('percent', order.x_cva_percent or 0.0)
             scope = res.get('scope') or 'order'
+            # Un solo botón guarda Facturado y aplica: si la orden ya trae %
+            # por línea, se abre respetándolos para que guardar sin tocar
+            # porcentajes no los limpie.
+            lines = order.order_line.filtered(lambda l: not l.display_type)
+            if 'default_keep_line_overrides' not in self.env.context \
+                    and any(lines.mapped('x_cva_has_override')):
+                res['keep_line_overrides'] = True
             keep = res.get('keep_line_overrides')
             lines_vals = []
-            for line in order.order_line.filtered(lambda l: not l.display_type):
+            for line in lines:
                 pct = self._cva_preview_percent(
                     line, True, res['percent'], scope, keep)
                 lines_vals.append((0, 0, dict(
@@ -177,29 +184,45 @@ class SaleCvaApplyWizard(models.TransientModel):
             wiz.below_cost = bool(wiz.total_cost_all_in) and \
                 sub_new < wiz.total_cost_all_in - 0.005
 
-    def action_confirm(self):
+    def _cva_percent_changes(self):
+        """¿La captura cambia algún porcentaje? Si solo se tocó Facturado,
+        no se re-aplica el ajuste (ni se escribe historial)."""
         self.ensure_one()
         order = self.order_id
+        differs = lambda a, b: abs((a or 0.0) - (b or 0.0)) > 0.005  # noqa: E731
+        wlines = self.line_ids.filtered('line_id')
+        if self.scope == 'lines':
+            return any(
+                differs(w.percent_new, w.line_id.x_cva_percent)
+                for w in wlines if w.selected)
+        if differs(self.percent, order.x_cva_percent):
+            return True
+        if not self.keep_line_overrides and any(
+                wlines.mapped('line_id.x_cva_has_override')):
+            return True
+        return any(
+            differs(self._line_new_percent(w), w.line_id.x_cva_percent)
+            for w in wlines)
+
+    def action_confirm(self):
+        """Botón único: aplica el ajuste si cambió algún porcentaje y
+        guarda el Facturado capturado."""
+        self.ensure_one()
+        order = self.order_id
+        order._cva_check_manager()
         if self.scope == 'lines':
             selected = self.line_ids.filtered(lambda w: w.selected and w.line_id)
             if not selected:
                 raise UserError(_('Selecciona al menos una línea.'))
-            order._cva_apply(
-                self.percent, scope='lines', reason=self.reason,
-                line_percents={w.line_id.id: w.percent_new or 0.0
-                               for w in selected})
-        else:
-            order._cva_apply(self.percent, scope='order', reason=self.reason,
-                             keep_line_overrides=self.keep_line_overrides)
-        self._cva_save_invoiced()
-        return {'type': 'ir.actions.act_window_close'}
-
-    def action_save_invoiced(self):
-        """Solo guarda el Facturado; no toca porcentajes. "Aplicar" en
-        'Toda la orden' limpia los % por línea: marcar facturado no debe
-        obligar a pasar por ahí."""
-        self.ensure_one()
-        self.order_id._cva_check_manager()
+        if self._cva_percent_changes():
+            if self.scope == 'lines':
+                order._cva_apply(
+                    self.percent, scope='lines', reason=self.reason,
+                    line_percents={w.line_id.id: w.percent_new or 0.0
+                                   for w in selected})
+            else:
+                order._cva_apply(self.percent, scope='order', reason=self.reason,
+                                 keep_line_overrides=self.keep_line_overrides)
         self._cva_save_invoiced()
         return {'type': 'ir.actions.act_window_close'}
 

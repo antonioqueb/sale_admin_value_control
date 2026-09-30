@@ -11,24 +11,31 @@ class TestCvaInvoiced(CvaCase):
             .with_context(default_order_id=order.id).create({'order_id': order.id})
 
     def test_01_save_invoiced_keeps_line_percents(self):
-        """Guardar facturado no toca los % por línea (Aplicar en 'Toda la
-        orden' sí los limpiaría)."""
+        """Botón único: si solo se captura Facturado, no se re-aplica el
+        ajuste (los % por línea se conservan y no se escribe historial)."""
         order = self._make_order(n_lines=2)
         line_a, line_b = order.order_line
         self._apply(order, 0.0, scope='lines',
                     line_percents={line_a.id: 20.0, line_b.id: 10.0})
+        History = self.env['sale.cva.history'].sudo()
+        n_history = History.search_count([('order_id', '=', order.id)])
         wiz = self._wizard(order)
+        # Con % por línea el wizard abre respetándolos.
+        self.assertTrue(wiz.keep_line_overrides)
         wiz.line_ids.filtered(lambda w: w.line_id == line_a).invoiced_amount = 80.0
         # Total de referencia: suma de lo capturado, sin tocar los importes.
         total_adm_before = wiz.total_adm_new
         self.assertAlmostEqual(wiz.total_invoiced, 80.0)
         self.assertEqual(wiz.invoiced_lines_label, '1 de 2 líneas')
         self.assertAlmostEqual(wiz.total_adm_new, total_adm_before)
-        wiz.action_save_invoiced()
+        self.assertFalse(wiz._cva_percent_changes())
+        wiz.action_confirm()
         self.assertAlmostEqual(line_a.x_cva_invoiced_amount, 80.0)
         self.assertAlmostEqual(line_b.x_cva_invoiced_amount, 0.0)
         self.assertAlmostEqual(line_a.x_cva_percent, 20.0)
         self.assertAlmostEqual(line_b.x_cva_percent, 10.0)
+        self.assertEqual(
+            History.search_count([('order_id', '=', order.id)]), n_history)
         # Al reabrir, el wizard trae lo facturado.
         wiz2 = self._wizard(order)
         self.assertAlmostEqual(
