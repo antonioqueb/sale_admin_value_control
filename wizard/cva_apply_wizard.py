@@ -44,6 +44,17 @@ class SaleCvaApplyWizard(models.TransientModel):
         help='Suma del costo ALL-IN (base + logística + arancel) de las '
              'líneas, en la divisa de la orden y sin IVA. Sirve de piso '
              'para decidir cuánto ajustar.')
+    # Totales de las columnas nuevas. Utilidad sobre las líneas CON costo
+    # all-in (las que no lo tienen saldrían con 100 % y la inflarían).
+    total_margin_current = fields.Float(
+        string='Utilidad hoy', compute='_compute_preview', digits=(16, 4))
+    total_margin_new = fields.Float(
+        string='Nueva utilidad', compute='_compute_preview', digits=(16, 4))
+    total_invoiced = fields.Monetary(
+        string='Facturado', compute='_compute_preview',
+        help='Suma de lo capturado en Facturado. Solo referencia: no entra '
+             'en ningún cálculo.')
+    invoiced_lines_label = fields.Char(compute='_compute_preview')
 
     @api.constrains('percent')
     def _check_percent(self):
@@ -128,17 +139,32 @@ class SaleCvaApplyWizard(models.TransientModel):
 
     @api.depends('percent', 'scope', 'keep_line_overrides',
                  'line_ids.selected', 'line_ids.percent_new',
-                 'line_ids.cost_all_in', 'order_id')
+                 'line_ids.cost_all_in', 'line_ids.invoiced_amount',
+                 'line_ids.subtotal_adm_current', 'order_id')
     def _compute_preview(self):
         for wiz in self:
             order = wiz.order_id
             total_ref = order.amount_total or 0.0
             total_new = sub_new = 0.0
+            cost_sum = cur_with_cost = new_with_cost = 0.0
             for wline in wiz.line_ids:
                 line = wline.line_id
                 pct_new = wiz._line_new_percent(wline)
+                line_sub_new = (line.price_subtotal or 0.0) * (1.0 - pct_new / 100.0)
                 total_new += (line.price_total or 0.0) * (1.0 - pct_new / 100.0)
-                sub_new += (line.price_subtotal or 0.0) * (1.0 - pct_new / 100.0)
+                sub_new += line_sub_new
+                if wline.cost_all_in:
+                    cost_sum += wline.cost_all_in
+                    cur_with_cost += wline.subtotal_adm_current or 0.0
+                    new_with_cost += line_sub_new
+            wiz.total_margin_current = (cur_with_cost - cost_sum) / cur_with_cost \
+                if cost_sum and cur_with_cost else 0.0
+            wiz.total_margin_new = (new_with_cost - cost_sum) / new_with_cost \
+                if cost_sum and new_with_cost else 0.0
+            invoiced = wiz.line_ids.filtered(lambda w: (w.invoiced_amount or 0.0) > 0)
+            wiz.total_invoiced = sum(invoiced.mapped('invoiced_amount'))
+            wiz.invoiced_lines_label = _('%(n)s de %(t)s líneas') % {
+                'n': len(invoiced), 't': len(wiz.line_ids)}
             if order.currency_id:
                 total_new = order.currency_id.round(total_new)
             wiz.total_ref = total_ref

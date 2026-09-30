@@ -385,6 +385,10 @@ $cva-danger: #c62828;
             font-size: 0.8rem;
             color: $cva-muted;
         }
+        &_invoiced {
+            background: rgba(11, 138, 92, 0.12);
+            border-color: #b7e1cd;
+        }
         &_accent {
             background: linear-gradient(135deg, $cva-blue-soft 0%, #dbe7fd 100%);
             border-color: #b6ccf5;

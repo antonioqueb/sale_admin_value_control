@@ -19,6 +19,7 @@
                             <h2>Ajuste administrativo · <field name="order_id" readonly="1" options="{'no_open': True}"/></h2>
                             <p>
                                 Indica cuánto se descuenta del valor administrativo de la orden.
+                                «Facturado» es solo referencia: no cambia ningún cálculo.
                                 La orden, la factura y la contabilidad no cambian.
                             </p>
                         </div>
@@ -103,7 +104,8 @@
                                 <field name="margin_current" widget="percentage" readonly="1"/>
                                 <field name="margin_new" widget="percentage" readonly="1"
                                        class="o_cva_wiz_col_new"/>
-                                <field name="invoiced_amount" class="o_cva_wiz_col_invoiced"/>
+                                <field name="invoiced_amount" class="o_cva_wiz_col_invoiced"
+                                       sum="Total facturado"/>
                                 <field name="cost_all_in" column_invisible="1"/>
                                 <field name="currency_id" column_invisible="1"/>
                                 <field name="line_id" column_invisible="1"/>
@@ -132,6 +134,21 @@
                             <span class="o_cva_wiz_card_label">Costo all-in (sin IVA)</span>
                             <field name="total_cost_all_in" class="o_cva_wiz_card_value"/>
                             <span class="o_cva_wiz_card_note">Subtotal con ajuste: <field name="subtotal_adm_new" class="o_cva_wiz_inline"/></span>
+                        </div>
+                        <div class="o_cva_wiz_card">
+                            <span class="o_cva_wiz_card_label">Utilidad hoy</span>
+                            <field name="total_margin_current" widget="percentage" class="o_cva_wiz_card_value"/>
+                            <span class="o_cva_wiz_card_note">Sobre el costo all-in</span>
+                        </div>
+                        <div class="o_cva_wiz_card o_cva_wiz_card_accent">
+                            <span class="o_cva_wiz_card_label">Nueva utilidad</span>
+                            <field name="total_margin_new" widget="percentage" class="o_cva_wiz_card_value"/>
+                            <span class="o_cva_wiz_card_note">Con este ajuste</span>
+                        </div>
+                        <div class="o_cva_wiz_card o_cva_wiz_card_invoiced">
+                            <span class="o_cva_wiz_card_label">Facturado (referencia)</span>
+                            <field name="total_invoiced" class="o_cva_wiz_card_value"/>
+                            <span class="o_cva_wiz_card_note"><field name="invoiced_lines_label" class="o_cva_wiz_inline"/></span>
                         </div>
                     </div>
                     <div class="o_cva_wiz_alert" invisible="not below_cost" role="alert">

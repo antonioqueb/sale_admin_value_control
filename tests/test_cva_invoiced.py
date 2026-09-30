@@ -19,6 +19,11 @@ class TestCvaInvoiced(CvaCase):
                     line_percents={line_a.id: 20.0, line_b.id: 10.0})
         wiz = self._wizard(order)
         wiz.line_ids.filtered(lambda w: w.line_id == line_a).invoiced_amount = 80.0
+        # Total de referencia: suma de lo capturado, sin tocar los importes.
+        total_adm_before = wiz.total_adm_new
+        self.assertAlmostEqual(wiz.total_invoiced, 80.0)
+        self.assertEqual(wiz.invoiced_lines_label, '1 de 2 líneas')
+        self.assertAlmostEqual(wiz.total_adm_new, total_adm_before)
         wiz.action_save_invoiced()
         self.assertAlmostEqual(line_a.x_cva_invoiced_amount, 80.0)
         self.assertAlmostEqual(line_b.x_cva_invoiced_amount, 0.0)
