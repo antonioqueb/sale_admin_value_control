@@ -4,3 +4,4 @@ from . import test_cva_security
 from . import test_cva_lens
 from . import test_cva_isolation
 from . import test_cva_history
+from . import test_cva_invoiced

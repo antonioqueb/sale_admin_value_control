@@ -57,9 +57,17 @@ class SaleOrderLine(models.Model):
         groups=CVA_USER)
     x_cva_write_date = fields.Datetime(
         string='Última modificación adm.', copy=False, groups=CVA_USER)
+    # Control interno de qué líneas ya se facturaron y por cuánto (captura
+    # manual desde el wizard de % Ajuste). No toca facturas ni contabilidad.
+    x_cva_invoiced_amount = fields.Monetary(
+        string='Facturado', copy=False, groups=CVA_USER,
+        help='Monto facturado de la línea (captura administrativa). Si es '
+             'mayor a cero, la línea se marca en verde en el wizard de '
+             'ajuste.')
 
     _CVA_MANUAL_FIELDS = ('x_cva_has_override', 'x_cva_percent_override',
-                          'x_cva_write_uid', 'x_cva_write_date')
+                          'x_cva_write_uid', 'x_cva_write_date',
+                          'x_cva_invoiced_amount')
 
     def write(self, vals):
         if any(f in vals for f in self._CVA_MANUAL_FIELDS):

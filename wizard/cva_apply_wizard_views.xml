@@ -79,11 +79,12 @@
                             <span class="o_cva_wiz_step_num">3</span>
                             Revisa cómo quedan los productos
                         </div>
-                        <field name="line_ids" nolabel="1" class="o_cva_wiz_lines"
-                               readonly="scope != 'lines'">
-                            <list create="false" delete="false" editable="bottom">
+                        <field name="line_ids" nolabel="1" class="o_cva_wiz_lines">
+                            <list create="false" delete="false" editable="bottom"
+                                  decoration-success="invoiced_amount &gt; 0">
                                 <field name="selected" widget="boolean_toggle"
-                                       column_invisible="parent.scope != 'lines'"/>
+                                       column_invisible="parent.scope != 'lines'"
+                                       readonly="parent.scope != 'lines'"/>
                                 <field name="product_id" readonly="1"/>
                                 <field name="name" readonly="1" optional="hide"/>
                                 <field name="qty" readonly="1"/>
@@ -95,11 +96,15 @@
                                 <field name="company_id" column_invisible="1"/>
                                 <field name="quick_id" widget="selection"
                                        column_invisible="parent.scope != 'lines'"
-                                       readonly="not selected"/>
+                                       readonly="parent.scope != 'lines' or not selected"/>
                                 <field name="percent_new" class="o_cva_wiz_col_new"
                                        readonly="parent.scope != 'lines' or not selected"/>
                                 <field name="subtotal_adm_new" readonly="1" class="o_cva_wiz_col_new"/>
-                                <field name="cost_all_in" readonly="1" optional="show"/>
+                                <field name="margin_current" widget="percentage" readonly="1"/>
+                                <field name="margin_new" widget="percentage" readonly="1"
+                                       class="o_cva_wiz_col_new"/>
+                                <field name="invoiced_amount" class="o_cva_wiz_col_invoiced"/>
+                                <field name="cost_all_in" column_invisible="1"/>
                                 <field name="currency_id" column_invisible="1"/>
                                 <field name="line_id" column_invisible="1"/>
                             </list>
@@ -145,6 +150,8 @@
                 <footer>
                     <button string="Aplicar ajuste" name="action_confirm"
                             type="object" class="btn-primary" icon="fa-check"/>
+                    <button string="Guardar facturado" name="action_save_invoiced"
+                            type="object" class="btn-secondary" icon="fa-file-text-o"/>
                     <button string="Cancelar" special="cancel" class="btn-secondary"/>
                 </footer>
             </form>

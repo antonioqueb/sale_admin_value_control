@@ -68,6 +68,7 @@ class SaleCvaApplyWizard(models.TransientModel):
                     line, True, res['percent'], scope, keep)
                 lines_vals.append((0, 0, dict(
                     line_id=line.id, selected=True,
+                    invoiced_amount=line.x_cva_invoiced_amount or 0.0,
                     **self._cva_preview_vals(line, pct))))
             res['line_ids'] = lines_vals
         return res
@@ -164,7 +165,27 @@ class SaleCvaApplyWizard(models.TransientModel):
         else:
             order._cva_apply(self.percent, scope='order', reason=self.reason,
                              keep_line_overrides=self.keep_line_overrides)
+        self._cva_save_invoiced()
         return {'type': 'ir.actions.act_window_close'}
+
+    def action_save_invoiced(self):
+        """Solo guarda el Facturado; no toca porcentajes. "Aplicar" en
+        'Toda la orden' limpia los % por línea: marcar facturado no debe
+        obligar a pasar por ahí."""
+        self.ensure_one()
+        self.order_id._cva_check_manager()
+        self._cva_save_invoiced()
+        return {'type': 'ir.actions.act_window_close'}
+
+    def _cva_save_invoiced(self):
+        """Guarda el Facturado capturado por línea (solo lo que cambió)."""
+        self.ensure_one()
+        for wline in self.line_ids.filtered('line_id'):
+            line = wline.line_id
+            amount = wline.invoiced_amount or 0.0
+            if self.currency_id.compare_amounts(
+                    amount, line.x_cva_invoiced_amount or 0.0) != 0:
+                line.write({'x_cva_invoiced_amount': amount})
 
 
 class SaleCvaApplyWizardLine(models.TransientModel):
@@ -198,6 +219,20 @@ class SaleCvaApplyWizardLine(models.TransientModel):
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     percent_new = fields.Float(string='Ajuste a aplicar (%)', digits=(5, 2))
     subtotal_adm_new = fields.Monetary(string='Importe con ajuste')
+    # Utilidad sobre costo ALL-IN, misma fórmula que el Margen All-In % de
+    # la orden: (subtotal − costo) / subtotal. Razón (0.35 = 35 %).
+    margin_current = fields.Float(
+        string='Utilidad hoy', compute='_compute_margins', digits=(16, 4),
+        help='Utilidad sobre el costo all-in con el importe administrativo '
+             'actual: (importe − costo) / importe. Vacía si el producto no '
+             'tiene costo all-in.')
+    margin_new = fields.Float(
+        string='Nueva utilidad', compute='_compute_margins', digits=(16, 4),
+        help='Utilidad sobre el costo all-in con el ajuste capturado.')
+    invoiced_amount = fields.Monetary(
+        string='Facturado',
+        help='Monto facturado de la línea. Si es mayor a cero la línea se '
+             'marca en verde. Se guarda al aplicar.')
     cost_all_in = fields.Monetary(
         string='Costo all-in', compute='_compute_cost_all_in',
         help='Costo ALL-IN del producto (base + logística + arancel) × '
@@ -249,3 +284,11 @@ class SaleCvaApplyWizardLine(models.TransientModel):
             wline.cost_all_in = wline.line_id._cva_cost_all_in() \
                 if wline.line_id else 0.0
 
+    @api.depends('cost_all_in', 'subtotal_adm_current', 'subtotal_adm_new')
+    def _compute_margins(self):
+        for wline in self:
+            cost = wline.cost_all_in or 0.0
+            cur_sub = wline.subtotal_adm_current or 0.0
+            new_sub = wline.subtotal_adm_new or 0.0
+            wline.margin_current = (cur_sub - cost) / cur_sub if cost and cur_sub else 0.0
+            wline.margin_new = (new_sub - cost) / new_sub if cost and new_sub else 0.0
